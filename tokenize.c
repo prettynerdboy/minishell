@@ -1,36 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <readline/readline.h>
-
-
-# define SINGLE_QUOTE '\''
-# define DOUBLE_QUOTE '"'
-
-//This tokenizer is beta that doesn't handle error handling properly, edge cases either.
-
-enum e_token_type {
-	TK_WORD,
-	TK_OP,
-	TK_EOF,
-};typedef enum e_token_type	t_token_type;
-
-struct s_token {
-	char			*word;
-	t_token_type	type;
-	struct s_token			*next;
-}; typedef struct s_token		t_token;
+#include "minishell.h"
 
 t_token	*new_token(char *word, t_token_type type)
 {
 	t_token	*tok;
 
-	tok = calloc(1, sizeof(*tok));
+	tok = ft_calloc(1, sizeof(*tok));
 	if (tok == NULL)
 		perror("calloc error");
 	tok->word = word;
 	tok->type = type;
 	return (tok);
+}
+
+t_token	*tokencpy(t_token *tok)
+{
+	char	*word;
+
+	word = ft_strdup(tok->word);
+	return (new_token(word, tok->type));
+}
+
+void	add_token(t_token **tok, t_token *elm)
+{
+	if (*tok == NULL)
+	{
+		*tok = elm;
+		return ;
+	}
+	add_token(&(*tok)->next, elm);
 }
 
 int is_blank(char c)
@@ -43,7 +40,7 @@ int is_blank(char c)
 
 int is_meta(char c)
 {
-	if (is_blank(c) || (c && strchr("|<>\n", c)))
+	if (is_blank(c) || (c && ft_strchr("|<>\n", c)))
 		return (1);
     else
         return(0);
@@ -69,10 +66,10 @@ t_token *operator(char **rest, char *line)
     i=0;
     while (i < total_op)
     {
-        op_len = strlen(operators[i]);
-        if (strncmp(line, operators[i], op_len) == 0)
+        op_len = ft_strlen(operators[i]);
+        if (ft_strncmp(line, operators[i], op_len) == 0)
         {
-            op = strdup(operators[i]);
+            op = ft_strdup(operators[i]);
             *rest = line + op_len;
             return new_token(op, TK_OP);
         }
@@ -110,7 +107,7 @@ t_token *word(char **rest, char *line)
         else 
             line++;
     }
-    word = strndup(start, line - start);
+    word = ft_strndup(start, line - start);
     if (!word)
         perror("strndup");
     *rest = line;
@@ -143,29 +140,3 @@ t_token *tokenizer(char *line)
     tok->next = new_token(NULL, TK_EOF);
     return(head.next);
 }
-
-
-// void print_tokens(t_token *tokens) {
-//     while (tokens) {
-//         const char *kind_str = tokens->type == TK_WORD ? "WORD" :
-//                                tokens->type == TK_OP   ? "OP" :
-//                                                           "EOF";
-//         printf("Token: %s (Kind: %s)\n", tokens->word ? tokens->word : "NULL", kind_str);
-//         tokens = tokens->next;
-//     }
-// }
-// int main(void) {
-//     char *line;
-//     t_token *token;
-
-//     while (1) {
-//         line = readline("tokenizer> ");
-//         printf("comandline=%s\n",line);
-//         add_history(line);
-//         token = tokenizer(line);
-//         print_tokens(token);
-//         // free_tokens(token);
-//         free(line);
-//     }
-//     return 0;
-// }
