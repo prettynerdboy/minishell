@@ -47,6 +47,8 @@ struct s_node {
 //macro
 # define SINGLE_QUOTE '\''
 # define DOUBLE_QUOTE '"'
+# define READ 0
+# define WRITE 1
 
 //function
 
@@ -59,6 +61,7 @@ t_token	*tokencpy(t_token *tok);
 int check_eof(t_token *tok);
 void	add_token(t_token **tok, t_token *elm);
 int token_is(t_token *token, const char *str);
+int	get_token_list_length(t_token *tok);
 
 //tokenizefunction
 t_token *operator(char **rest, char *line);
@@ -76,6 +79,14 @@ t_node	*pipeline(t_token **rest, t_token *tok);
 t_node	*parser(t_token *tok);
 
 
+//exev
+int execution(t_node *node);
+pid_t run_pipeline(t_node *node);
+int wait_process(pid_t last_pid);
 
+
+//free
+void wp_free(char ***str);
+void error_exit(char *msg);
 
 #endif

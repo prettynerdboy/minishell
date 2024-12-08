@@ -70,10 +70,9 @@ void shell(char *line, int *status)
 
 	tokens = tokenizer(line);
     nodes=parser(tokens);
-    status=NULL;
     printf("=== Syntax Tree ===\n");
     print_tree(nodes, 0);
-    printf("===================\n");
+    *status=execution(nodes);
 }
 
 int	main(void)
