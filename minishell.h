@@ -99,9 +99,6 @@ int execution(t_node *node);
 pid_t run_pipeline(t_node *node);
 int wait_process(pid_t last_pid);
 
-// signal
-int							start_signal(void);
-
 //free
 void wp_free(char ***str);
 void error_exit(char *msg);
