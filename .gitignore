@@ -1,1 +1,5 @@
 .vscode
+*.o
+libft/*.o
+my_minishell
+libft/libft.a

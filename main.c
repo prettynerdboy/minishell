@@ -88,24 +88,42 @@ void	shell(char *line, int *status)
 	printf("===================\n");
 }
 
+
+static void	signal_handler_test(int sig)
+{
+    // 改行と次のプロンプト表示
+    printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
+    // 必要なら手動でリフレッシュする
+    rl_on_new_line();  // 新しい行を作成
+    rl_replace_line("", 0);  // 現在の入力行をクリア
+    rl_redisplay();  // プロンプトを再表示
+}
+
+int	start_signal(void)
+{
+	signal(SIGINT, signal_handler_test);
+}
+
 int	main(void)
 {
 	int status;
 	char *line;
+	static int continued;
 
+	continued = 1;
 	status = 0;
-	while (1)
+	signal(SIGINT, signal_handler_test);
+	while (continued)
 	{
 		line = readline("minishell$ ");
 		if (line == NULL)
 			break ;
 		if (*line)
 			add_history(line);
-		start_signal();
-		// if (!ft_strncmp(line, "^C", 2))
-		// continue ;
+		// 	break;
 		shell(line, &status);
 		free(line);
 	}
 	exit(status);
+	start_signal();
 }

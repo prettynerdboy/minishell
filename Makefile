@@ -6,14 +6,14 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/07 21:30:22 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/09 15:10:15 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME    	= my_minishell
 LIB_DIR		= libft
 LIB_NAME	= $(LIB_DIR)/libft.a
-SRCS    	= main.c parser.c signal.c tokenize.c shell.c
+SRCS    	= main.c parser.c signal.c tokenize.c
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
 LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -lreadline
