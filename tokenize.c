@@ -30,7 +30,20 @@ void	add_token(t_token **tok, t_token *elm)
 	add_token(&(*tok)->next, elm);
 }
 
-int	is_blank(char c)
+int	get_token_list_length(t_token *tok)
+{
+	int len = 0;
+
+	while (tok != NULL && tok->type != TK_EOF)
+	{
+		len++;
+		tok = tok->next;
+	}
+	return (len);
+}
+
+
+int is_blank(char c)
 {
 	if (c == ' ' || c == '\n')
 		return (1);

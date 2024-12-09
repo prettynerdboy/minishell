@@ -99,11 +99,6 @@ static void	signal_handler_test(int sig)
     rl_redisplay();  // プロンプトを再表示
 }
 
-int	start_signal(void)
-{
-	signal(SIGINT, signal_handler_test);
-}
-
 int	main(void)
 {
 	int status;
