@@ -103,7 +103,7 @@ static char	**token_to_argv(t_token *tok)
 	i = 0;
 	while (tok != NULL && tok->type != TK_EOF)
 	{
-		argv[i] = strdup(tok->word);
+		argv[i] = ft_strdup(tok->word);
 		if (argv[i] == NULL)
 		{
             wp_free(&argv);
@@ -140,6 +140,7 @@ pid_t run_pipeline(t_node *node)
         else if (pid == 0)
         {
             connect_pipe(current_node);
+			redirect(current_node->command->redirects);
             argv = token_to_argv(current_node->command->args);
             cmd = argv[0];
             path = make_path(cmd);
@@ -149,9 +150,9 @@ pid_t run_pipeline(t_node *node)
             perror("execve");
         }
         if (current_node->inpipe[0] != STDIN_FILENO)
-		close(current_node->inpipe[0]);
+			close(current_node->inpipe[0]);
 	    if (current_node->next)
-		close(current_node->outpipe[1]);
+			close(current_node->outpipe[1]);
         current_node = current_node->next; 
     }
     return pid;

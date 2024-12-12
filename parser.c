@@ -51,7 +51,7 @@ t_node	*redirect_out(t_token **rest, t_token *tok)
 
 	node = new_node(ND_REDIR_OUT);
 	node->filename = tokencpy(tok->next);
-	node->targetfd = -1;
+	node->default_fd = STDOUT_FILENO;
 	*rest = tok->next->next;
 	return (node);
 }
@@ -62,7 +62,7 @@ t_node	*redirect_in(t_token **rest, t_token *tok)
 
 	node = new_node(ND_REDIR_IN);
 	node->filename = tokencpy(tok->next);
-	node->targetfd = -1;
+	node->default_fd = STDIN_FILENO;
 	*rest = tok->next->next;
 	return (node);
 }

@@ -1,7 +1,9 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 #include <readline/readline.h>
-#include <string.h> //delete
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
 # include "libft.h"
 
 //struct
@@ -33,10 +35,10 @@ struct s_node {
 	t_token		*args;
 	struct s_node		*redirects;
 
-	int			targetfd;
+	int			default_fd;
 	t_token		*filename;
 	t_token		*delimiter;
-	int			filefd;
+	int			redirect_fd;
 	int			stashed_targetfd;
 
 	int			inpipe[2];
@@ -77,6 +79,11 @@ t_node	*redirect_in(t_token **rest, t_token *tok);
 t_node *make_cmd_node(t_token **rest, t_token *tok);
 t_node	*pipeline(t_token **rest, t_token *tok);
 t_node	*parser(t_token *tok);
+
+//redirect
+int open_redir_file(t_node *node);
+int handle_redirection(t_node *node);
+void	redirect(t_node *redir);
 
 
 //exev
