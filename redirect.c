@@ -1,11 +1,44 @@
 #include "minishell.h"
 
-int handle_redirection(t_node *node) {
-    if (node->kind == ND_REDIR_OUT)
-        return open(node->filename->word, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-    else if (node->kind == ND_REDIR_IN)
-        return open(node->filename->word, O_RDONLY);
-    perror("Unknown redirection type");
+
+int handle_heredoc(t_node *redirect_node)
+{
+    int fd[2];
+    char *line;
+    if (pipe(fd) < 0)
+    {
+        perror("Failed to create pipe");
+        return -1;
+    }
+    while (1)
+    {
+        line = readline("> ");
+        if (!line) 
+            break;
+        if (ft_strcmp(line, redirect_node->delimiter->word) == 0)
+        {
+            free(line);
+            break;
+        }
+        write(fd[WRITE], line, ft_strlen(line));
+        write(fd[WRITE], "\n", 1); 
+        free(line);
+    }
+    close(fd[WRITE]);
+    return fd[READ];
+}
+int handle_redirection(t_node *redirect_node)
+{
+    if (redirect_node->kind == ND_REDIR_OUT)
+        return open(redirect_node->filename->word, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    else if (redirect_node->kind == ND_REDIR_IN)
+        return open(redirect_node->filename->word, O_RDONLY);
+    else if (redirect_node->kind == ND_REDIR_APPEND)
+        return open(redirect_node->filename->word, O_CREAT | O_WRONLY | O_APPEND, 0644);
+    else if (redirect_node->kind == ND_REDIR_HEREDOC)
+		return handle_heredoc(redirect_node);
+    else
+        perror("Unknown redirection type");
     return -1;
 }
 
@@ -50,16 +83,16 @@ int	is_redirect(t_node *node)
 	return (0);
 }
 
-void	redirect(t_node *redir)
+void	redirect(t_node *redirect_node)
 {
-	if (redir == NULL)
+	if (redirect_node == NULL)
 		return ;
-	if (is_redirect(redir))
+	if (is_redirect(redirect_node))
 	{
-		dup2(redir->redirect_fd, redir->default_fd);
-        close(redir->redirect_fd);
+		dup2(redirect_node->redirect_fd, redirect_node->default_fd);
+        close(redirect_node->redirect_fd);
 	}
 	else
 		perror("faile,redirect");
-	redirect(redir->next);
+	redirect(redirect_node->next);
 }

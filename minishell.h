@@ -30,20 +30,16 @@ enum e_node_kind {
 
 struct s_node {
 	t_node_kind	kind;
-	struct s_node	*next;
-
-	t_token		*args;
+	struct s_node		*command;
 	struct s_node		*redirects;
-
-	int			default_fd;
+	t_token		*args;
 	t_token		*filename;
 	t_token		*delimiter;
+	int			default_fd;
 	int			redirect_fd;
-	int			stashed_targetfd;
-
 	int			inpipe[2];
 	int			outpipe[2];
-	struct s_node		*command;
+	struct s_node	*next;
 }; typedef struct s_node			t_node;
 
 //macro
@@ -76,6 +72,8 @@ t_node	*new_node(t_node_kind kind);
 void	add_node(t_node **node, t_node *elm);
 t_node	*redirect_out(t_token **rest, t_token *tok);
 t_node	*redirect_in(t_token **rest, t_token *tok);
+t_node	*redirect_append(t_token **rest, t_token *tok);
+t_node	*redirect_heredoc(t_token **rest, t_token *tok);
 t_node *make_cmd_node(t_token **rest, t_token *tok);
 t_node	*pipeline(t_token **rest, t_token *tok);
 t_node	*parser(t_token *tok);
@@ -84,6 +82,7 @@ t_node	*parser(t_token *tok);
 int open_redir_file(t_node *node);
 int handle_redirection(t_node *node);
 void	redirect(t_node *redir);
+int handle_heredoc(t_node *redirect_node);
 
 
 //exev
