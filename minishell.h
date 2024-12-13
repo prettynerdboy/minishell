@@ -3,8 +3,12 @@
 # include "libft/libft.h"
 # include <readline/readline.h>
 # include <signal.h>
-# include <string.h> //delete
+#include <errno.h>
 #include <sys/types.h>
+#include <readline/readline.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
 
 // struct
 enum						e_token_type
@@ -34,25 +38,19 @@ enum						e_node_kind
 };
 typedef enum e_node_kind	t_node_kind;
 
-struct						s_node
-{
-	t_node_kind				kind;
-	struct s_node			*next;
-
-	t_token					*args;
-	struct s_node			*redirects;
-
-	int						targetfd;
-	t_token					*filename;
-	t_token					*delimiter;
-	int						filefd;
-	int						stashed_targetfd;
-
-	int						inpipe[2];
-	int						outpipe[2];
-	struct s_node			*command;
-};
-typedef struct s_node		t_node;
+struct s_node {
+	t_node_kind	kind;
+	struct s_node		*command;
+	struct s_node		*redirects;
+	t_token		*args;
+	t_token		*filename;
+	t_token		*delimiter;
+	int			default_fd;
+	int			redirect_fd;
+	int			inpipe[2];
+	int			outpipe[2];
+	struct s_node	*next;
+}; typedef struct s_node			t_node;
 
 // macro
 # define SINGLE_QUOTE '\''
@@ -84,15 +82,18 @@ t_node	*new_node(t_node_kind kind);
 void	add_node(t_node **node, t_node *elm);
 t_node	*redirect_out(t_token **rest, t_token *tok);
 t_node	*redirect_in(t_token **rest, t_token *tok);
+t_node	*redirect_append(t_token **rest, t_token *tok);
+t_node	*redirect_heredoc(t_token **rest, t_token *tok);
 t_node *make_cmd_node(t_token **rest, t_token *tok);
 t_node	*pipeline(t_token **rest, t_token *tok);
 t_node	*parser(t_token *tok);
 
-// tokenizefunction
-t_token						*operator(char **rest, char *line);
-void						handle_quote(char **line, char quote_type);
-t_token						*word(char **rest, char *line);
-t_token						*tokenizer(char *line);
+//redirect
+int open_redir_file(t_node *node);
+int handle_redirection(t_node *node);
+void	redirect(t_node *redir);
+int handle_heredoc(t_node *redirect_node);
+
 
 //exev
 int execution(t_node *node);

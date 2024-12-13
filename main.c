@@ -81,25 +81,25 @@ void	shell(char *line, int *status)
 	t_node	*nodes;
 
 	tokens = tokenizer(line);
-	nodes = parser(tokens);
-	printf("=== Syntax Tree ===\n");
-	print_tree(nodes, 0);
-	printf("===================\n");
+    nodes=parser(tokens);
+    printf("=== Syntax Tree ===\n");
+    print_tree(nodes, 0);
+	open_redir_file(nodes);
     *status=execution(nodes);
 	status = NULL;
 }
 
 
-static void	signal_handler_test(int sig)
-{
-    // 改行と次のプロンプト表示
-    // printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
-	printf("\n");
-    // 必要なら手動でリフレッシュする
-    rl_on_new_line();  // 新しい行を作成
-    rl_replace_line("", 0);  // 現在の入力行をクリア
-    rl_redisplay();  // プロンプトを再表示
-}
+// static void	signal_handler_test(int sig)
+// {
+//     // 改行と次のプロンプト表示
+//     // printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
+// 	printf("\n");
+//     // 必要なら手動でリフレッシュする
+//     rl_on_new_line();  // 新しい行を作成
+//     rl_replace_line("", 0);  // 現在の入力行をクリア
+//     rl_redisplay();  // プロンプトを再表示
+// }
 
 int	main(void)
 {
@@ -107,7 +107,7 @@ int	main(void)
 	char *line;
 
 	status = 0;
-	signal(SIGINT, signal_handler_test);
+	// signal(SIGINT, signal_handler_test);
 	while (1)
 	{
 		line = readline("minishell$ ");
