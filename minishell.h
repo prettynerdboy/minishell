@@ -103,5 +103,7 @@ int wait_process(pid_t last_pid);
 //free
 void wp_free(char ***str);
 void error_exit(char *msg);
+void free_token_list(t_token **head);
+void free_node(t_node *node);
 
 #endif

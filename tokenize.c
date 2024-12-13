@@ -53,7 +53,7 @@ int is_blank(char c)
 
 int	is_meta(char c)
 {
-	if (is_blank(c) || (c && ft_strchr("|<>\n", c)))
+	if (is_blank(c) || (c && ft_strchr("|<>&()\n", c)))
 		return (1);
 	else
 		return (0);
@@ -143,15 +143,29 @@ t_token	*tokenizer(char *line)
 		else if (is_meta(*line))
 		{
 			tok->next = operator(&line, line);
+			if (tok->next == NULL)
+			{
+				free_token_list(&head.next);
+				return (NULL);
+			}
 			tok = tok->next;
 		}
 		else if (is_word(*line))
 		{
 			tok->next = word(&line, line);
+			if (tok->next == NULL)
+			{
+				free_token_list(&head.next);
+				return (NULL);
+			}
 			tok = tok->next;
 		}
 		else
-			perror("Unexpected Token");
+		{
+			free_token_list(&head.next);
+			ft_putstr_fd("minishell: syntax error near unexpected token\n", STDERR_FILENO);
+			return (NULL);
+		}
 	}
 	tok->next = new_token(NULL, TK_EOF);
 	return (head.next);

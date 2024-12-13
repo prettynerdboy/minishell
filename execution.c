@@ -1,15 +1,6 @@
 #include "minishell.h"
 #include <errno.h>
 
-void error_exit(char *msg)
-{	
-    const char *red = "\033[31m"; 
-    const char *reset = "\033[0m"; 
-    write(2, red, 5);                
-    ft_putendl_fd(msg, 2) ;      
-    write(2, reset, 4);
-    exit(EXIT_FAILURE);
-}
 static char	*find_path(char **path_arr, const char *cmd)
 {
 	char	*part_path;

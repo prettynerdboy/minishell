@@ -2,6 +2,11 @@
 #include <readline/history.h>
 #include <stdio.h>
 
+ __attribute__((destructor))
+static void destructor() {
+    system("leaks -q a.out");
+ }
+
 // ノード種別を文字列に変換する関数
 // *第１引数 kind - ?
 const char	*node_kind_to_string(t_node_kind kind)
@@ -81,12 +86,18 @@ void	shell(char *line, int *status)
 	t_node	*nodes;
 
 	tokens = tokenizer(line);
-    nodes=parser(tokens);
-    printf("=== Syntax Tree ===\n");
-    print_tree(nodes, 0);
+	if (tokens == NULL)
+	{
+		*status = 258;  // bashの構文エラー時の終了ステータス
+		return;
+	}
+	nodes = parser(tokens);
+	printf("=== Syntax Tree ===\n");
+	print_tree(nodes, 0);
 	open_redir_file(nodes);
-    *status=execution(nodes);
-	status = NULL;
+	*status = execution(nodes);
+	free_token_list(&tokens);
+	free_node(nodes);
 }
 
 
@@ -115,9 +126,9 @@ int	main(void)
 			break ;
 		if (*line)
 			add_history(line);
-		// 	break;
 		shell(line, &status);
 		free(line);
+		break;
 	}
 	exit(status);
 }

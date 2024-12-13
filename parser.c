@@ -138,3 +138,5 @@ t_node	*parser(t_token *tok)
 {
 	return (pipeline(&tok, tok));
 }
+
+
