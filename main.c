@@ -91,6 +91,14 @@ void	shell(char *line, int *status)
 		*status = 258;  // bashの構文エラー時の終了ステータス
 		return;
 	}
+	
+	if (!check_syntax_error(tokens))
+	{
+		*status = 258;
+		free_token_list(&tokens);
+		return;
+	}
+
 	nodes = parser(tokens);
 	printf("=== Syntax Tree ===\n");
 	print_tree(nodes, 0);

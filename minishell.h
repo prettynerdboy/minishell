@@ -83,6 +83,9 @@ bool handle_quote(char **line, char quote_type, t_quote_state *quote);
 t_token *word(char **rest, char *line);
 t_token *tokenizer(char *line);
 
+//checksyntax
+bool check_syntax_error(t_token *tokens);
+
 //node
 t_node	*new_node(t_node_kind kind);
 void	add_node(t_node **node, t_node *elm);
