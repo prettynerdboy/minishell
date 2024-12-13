@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 // struct
 enum						e_token_type
@@ -26,6 +27,11 @@ struct						s_token
 	struct s_token			*next;
 };
 typedef struct s_token		t_token;
+
+typedef struct s_quote_state {
+	bool in_single_quote;
+	bool in_double_quote;
+} t_quote_state;
 
 enum						e_node_kind
 {
@@ -73,7 +79,7 @@ int	get_token_list_length(t_token *tok);
 
 //tokenizefunction
 t_token *operator(char **rest, char *line);
-void handle_quote(char **line, char quote_type);
+bool handle_quote(char **line, char quote_type, t_quote_state *quote);
 t_token *word(char **rest, char *line);
 t_token *tokenizer(char *line);
 

@@ -93,40 +93,68 @@ t_token	*operator(char **rest, char *line)
 	return (NULL);
 }
 
-void	handle_quote(char **line, char quote_type)
+bool handle_quote(char **line, char quote_type, t_quote_state *quote)
 {
-	char	*start;
-	char	*result;
-
-	start = ++(*line);
-	while (**line && **line != quote_type)
-		(*line)++;
-	if (**line == '\0')
-	{
-		perror("Unclosed quote");
-	}
 	(*line)++;
+	if (quote_type == SINGLE_QUOTE)
+		quote->in_single_quote = true;
+	else if (quote_type == DOUBLE_QUOTE)
+		quote->in_double_quote = true;
+	
+	while (**line)
+	{
+		if (**line == quote_type)
+		{
+			(*line)++;
+			if (quote_type == SINGLE_QUOTE)
+				quote->in_single_quote = false;
+			else if (quote_type == DOUBLE_QUOTE)
+				quote->in_double_quote = false;
+			return true;
+		}
+		(*line)++;
+	}
+	return false;
 }
 
 t_token	*word(char **rest, char *line)
 {
 	const char	*start = line;
 	char		*word;
+	t_quote_state quote = {false, false};
 
 	while (*line && !is_meta(*line))
 	{
-		if (*line == SINGLE_QUOTE || *line == DOUBLE_QUOTE)
+		if (*line == SINGLE_QUOTE && !quote.in_double_quote)
 		{
-			handle_quote(&line, *line);
+			if (!handle_quote(&line, SINGLE_QUOTE, &quote))
+			{
+				perror("Unclosed quote");
+				return NULL;
+			}
+			continue;
 		}
-		else
-			line++;
+		else if (*line == DOUBLE_QUOTE && !quote.in_single_quote)
+		{
+			if (!handle_quote(&line, DOUBLE_QUOTE, &quote))
+			{
+				perror("Unclosed quote");
+				return NULL;
+			}
+			continue;
+		}
+		line++;
+	}
+	if (quote.in_single_quote || quote.in_double_quote)//冗長かも
+	{
+		perror("Unclosed quote");
+		return NULL;
 	}
 	word = ft_strndup(start, line - start);
 	if (!word)
-		perror("strndup");
+		return NULL;
 	*rest = line;
-	return (new_token(word, TK_WORD));
+	return new_token(word, TK_WORD);
 }
 
 t_token	*tokenizer(char *line)
