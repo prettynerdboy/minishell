@@ -2,10 +2,10 @@
 #include <readline/history.h>
 #include <stdio.h>
 
- __attribute__((destructor))
-static void destructor() {
-    system("leaks -q a.out");
- }
+__attribute__((destructor)) static void destructor()
+{
+	system("leaks -q a.out");
+}
 
 // ノード種別を文字列に変換する関数
 // *第１引数 kind - ?
@@ -88,17 +88,15 @@ void	shell(char *line, int *status)
 	tokens = tokenizer(line);
 	if (tokens == NULL)
 	{
-		*status = 258;  // bashの構文エラー時の終了ステータス
-		return;
+		*status = 258; // bashの構文エラー時の終了ステータス
+		return ;
 	}
-	
 	if (!check_syntax_error(tokens))
 	{
 		*status = 258;
 		free_token_list(&tokens);
-		return;
+		return ;
 	}
-
 	nodes = parser(tokens);
 	printf("=== Syntax Tree ===\n");
 	print_tree(nodes, 0);
@@ -106,26 +104,46 @@ void	shell(char *line, int *status)
 	*status = execution(nodes);
 	free_token_list(&tokens);
 	free_node(nodes);
+	// printf("===================\n");
+	// *status = execution(nodes);
+	// status = NULL;
 }
 
+void	reset_prompt(void)
+{
+	printf("\n");
+	rl_on_new_line();       // 新しい行を作成
+	rl_replace_line("", 0); // 現在の入力行をクリア
+	rl_redisplay();         // プロンプトを再表示
+}
 
-// static void	signal_handler_test(int sig)
-// {
-//     // 改行と次のプロンプト表示
-//     // printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
-// 	printf("\n");
-//     // 必要なら手動でリフレッシュする
-//     rl_on_new_line();  // 新しい行を作成
-//     rl_replace_line("", 0);  // 現在の入力行をクリア
-//     rl_redisplay();  // プロンプトを再表示
-// }
+static void	signal_handler(int sig, siginfo_t *info, void *context)
+{
+	if (info->si_pid == 0)
+		return ;
+	if (sig == SIGINT)
+		reset_prompt();
+}
 
 int	main(void)
 {
 	int status;
+	int *loading;
 	char *line;
 
 	status = 0;
+
+	struct sigaction sigaction_t;
+
+	sigaction_t.sa_flags = SA_SIGINFO;
+	sigaction_t.sa_sigaction = &signal_handler;
+	sigemptyset(&sigaction_t.sa_mask);
+	signal(SIGQUIT, SIG_IGN);
+	if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
+	{
+		perror("sigaction fatal error");
+	}
+
 	// signal(SIGINT, signal_handler_test);
 	while (1)
 	{
@@ -136,7 +154,7 @@ int	main(void)
 			add_history(line);
 		shell(line, &status);
 		free(line);
-		break;
+		break ;
 	}
 	exit(status);
 }
