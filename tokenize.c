@@ -93,79 +93,13 @@ t_token	*operator(char **rest, char *line)
 	return (NULL);
 }
 
-// TODO 後でquote処理で使うからの残しておく
-// void	handle_get_env(char *word)
-// {
-// 	char	*tmp;
-// 	char	*env_path;
-// 	char	*env_changed;
-// 	int		*env;
-
-// 	// TODO error handling check
-// 	if (!word)
-// 		return ;
-// 	tmp = word;
-// 	env = NULL;
-// 	while (*tmp && *tmp != ' ')
-// 	{
-// 		if (*tmp == '$')
-// 			env = *tmp;
-// 		tmp++;
-// 	}
-// 	env_path = ft_strndup(env + 1, tmp - env - 1);
-// 	if (!env_path)
-// 		return ;
-// 	env_changed = getenv(env_path);
-// 	if (!env_changed)
-
-// }
-
-// void	handle_quote(char **line, char *word)
-// {
-// 	char	*start;
-// 	char	*result;
-// 	int		quote_count;
-// 	int		double_quote_count;
-
-// 	start = ++(*line);
-// 	quote_count = 0;
-// 	double_quote_count = 0;
-// 	while (*start)
-// 	{
-// 		if (start == SINGLE_QUOTE)
-// 			quote_count++;
-// 		if (start == DOUBLE_QUOTE)
-// 			double_quote_count++;
-// 		(start)++;
-// 	}
-// 	if ((quote_count % 2 == 1) || (double_quote_count % 2 == 1))
-// 		perror("Unclosed quote");
-// 	// double quote
-// 	result = ft_strtrim(*line, "\"");
-// 	if (!result)
-// 	{
-// 		word = ft_strdup(ft_strtrim(*line, "\'"));
-// 		return ;
-// 	}
-// 	// single quote
-// 	// if (**line == '\0')
-// 	// {
-// 	// 	perror("Unclosed quote");
-// 	// }
-// 	// // single quote
-// 	// *quote_status = 1;
-// 	// // double quote
-// 	// *quote_status = 2;
-// 	(*line)++;
-// }
-bool handle_quote(char **line, char quote_type, t_quote_state *quote)
+bool	handle_quote(char **line, char quote_type, t_quote_state *quote)
 {
 	(*line)++;
 	if (quote_type == SINGLE_QUOTE)
 		quote->in_single_quote = true;
 	else if (quote_type == DOUBLE_QUOTE)
 		quote->in_double_quote = true;
-	
 	while (**line)
 	{
 		if (**line == quote_type)
@@ -175,60 +109,52 @@ bool handle_quote(char **line, char quote_type, t_quote_state *quote)
 				quote->in_single_quote = false;
 			else if (quote_type == DOUBLE_QUOTE)
 				quote->in_double_quote = false;
-			return true;
+			return (true);
 		}
 		(*line)++;
 	}
-	return false;
+	return (false);
 }
 
 t_token	*word(char **rest, char *line)
 {
-	const char	*start = line;
-	char		*word;
-	t_quote_state quote = {false, false};
+	const char		*start = line;
+	char			*word;
+	t_quote_state	quote;
 
-	// int			quote_status;
-	// quote_status = 0;
+	quote = (t_quote_state){false, false};
 	while (*line && !is_meta(*line))
 	{
-		// if (*line == SINGLE_QUOTE || *line == DOUBLE_QUOTE)
-		// {
-		// 	handle_quote(&line, *line);
-		// 	break ;
-		// }
-		// else
-		line++;
 		if (*line == SINGLE_QUOTE && !quote.in_double_quote)
 		{
 			if (!handle_quote(&line, SINGLE_QUOTE, &quote))
 			{
 				perror("Unclosed quote");
-				return NULL;
+				return (NULL);
 			}
-			continue;
+			continue ;
 		}
 		else if (*line == DOUBLE_QUOTE && !quote.in_single_quote)
 		{
 			if (!handle_quote(&line, DOUBLE_QUOTE, &quote))
 			{
 				perror("Unclosed quote");
-				return NULL;
+				return (NULL);
 			}
-			continue;
+			continue ;
 		}
 		line++;
 	}
-	if (quote.in_single_quote || quote.in_double_quote)//冗長かも
+	if (quote.in_single_quote || quote.in_double_quote) //冗長かも
 	{
 		perror("Unclosed quote");
-		return NULL;
+		return (NULL);
 	}
 	word = ft_strndup(start, line - start);
 	if (!word)
-		return NULL;
+		return (NULL);
 	*rest = line;
-	return new_token(word, TK_WORD);
+	return (new_token(word, TK_WORD));
 }
 
 t_token	*tokenizer(char *line)
@@ -265,7 +191,8 @@ t_token	*tokenizer(char *line)
 		else
 		{
 			free_token_list(&head.next);
-			ft_putstr_fd("minishell: syntax error near unexpected token\n", STDERR_FILENO);
+			ft_putstr_fd("minishell: syntax error near unexpected token\n",
+				STDERR_FILENO);
 			return (NULL);
 		}
 	}
@@ -273,64 +200,69 @@ t_token	*tokenizer(char *line)
 	return (head.next);
 }
 
-
 //↓構文のエラーチェック
-static bool check_pipe_error(t_token *current)
+static bool	check_pipe_error(t_token *current)
 {
-    if (!current->next || current->next->type == TK_EOF)
-    {
-        ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", STDERR_FILENO);
-        return false;
-    }
-    if (token_is(current->next, "|"))
-    {
-        ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", STDERR_FILENO);
-        return false;
-    }
-    return true;
+	if (!current->next || current->next->type == TK_EOF)
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `|'\n",
+			STDERR_FILENO);
+		return (false);
+	}
+	if (token_is(current->next, "|"))
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `|'\n",
+			STDERR_FILENO);
+		return (false);
+	}
+	return (true);
 }
 
-static bool is_redirect_token(t_token *token)
+static bool	is_redirect_token(t_token *token)
 {
-    return (token_is(token, ">") || token_is(token, "<") || 
-            token_is(token, ">>") || token_is(token, "<<"));
+	return (token_is(token, ">") || token_is(token, "<") || token_is(token,
+			">>") || token_is(token, "<<"));
 }
 
-static bool check_redirect_filename_error(t_token *current)
+static bool	check_redirect_filename_error(t_token *current)
 {
-    if (!current->next || current->next->type != TK_WORD)
-    {
-        ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", STDERR_FILENO);
-        return false;
-    }
-    return true;
+	if (!current->next || current->next->type != TK_WORD)
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n",
+			STDERR_FILENO);
+		return (false);
+	}
+	return (true);
 }
 
-static bool check_consecutive_redirect_error(t_token *current)
+static bool	check_consecutive_redirect_error(t_token *current)
 {
-    if (is_redirect_token(current) && is_redirect_token(current->next))
-    {
-        ft_putstr_fd("minishell: syntax error near unexpected token `", STDERR_FILENO);
-        ft_putstr_fd(current->next->word, STDERR_FILENO);
-        ft_putstr_fd("'\n", STDERR_FILENO);
-        return false;
-    }
-    return true;
+	if (is_redirect_token(current) && is_redirect_token(current->next))
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `",
+			STDERR_FILENO);
+		ft_putstr_fd(current->next->word, STDERR_FILENO);
+		ft_putstr_fd("'\n", STDERR_FILENO);
+		return (false);
+	}
+	return (true);
 }
 
-bool check_syntax_error(t_token *tokens)
+bool	check_syntax_error(t_token *tokens)
 {
-    t_token *current = tokens;
+	t_token	*current;
 
-    while (current && current->type != TK_EOF)
-    {
-        if (token_is(current, "|") && !check_pipe_error(current))
-            return false;
-        if (is_redirect_token(current) && !check_redirect_filename_error(current))
-            return false;
-        if (!check_consecutive_redirect_error(current))
-            return false;
-        current = current->next;
-    }
-    return true;
+	current = tokens;
+	while (current && current->type != TK_EOF)
+	{
+		if (token_is(current, "|") && !check_pipe_error(current))
+			return (false);
+		if (is_redirect_token(current)
+			&& !check_redirect_filename_error(current))
+			return (false);
+		if (!check_consecutive_redirect_error(current))
+			return (false);
+		current = current->next;
+	}
+	return (true);
 }
