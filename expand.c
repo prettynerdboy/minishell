@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-extern int g_status = 0; //多分ヘッダファイルに記述、externいらんけど仮
+// extern int g_status = 0; //多分ヘッダファイルに記述、externいらんけど仮
 
 static char *ft_strjoin_free(char *s1, char *s2)
 {
@@ -22,7 +22,7 @@ static char *handle_status_var(int *i)
 {
 	char *var_value;
 
-	var_value = ft_itoa(g_status);
+	var_value = ft_itoa(set_status(-1));
 	(*i)++;
 	return (var_value);
 }

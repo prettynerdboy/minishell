@@ -2,10 +2,10 @@
 #include <readline/history.h>
 #include <stdio.h>
 
- __attribute__((destructor))
-static void destructor() {
-    system("leaks -q a.out");
- }
+__attribute__((destructor)) static void destructor()
+{
+	system("leaks -q a.out");
+}
 
 // ノード種別を文字列に変換する関数
 // *第１引数 kind - ?
@@ -80,7 +80,7 @@ void	print_tree(t_node *node, int depth)
 // shell起動関数
 // *第１引数 line - 入力されたコマンドライン文字列
 // *第２引数 status - ?
-void	shell(char *line, int *status)
+void	shell(char *line)
 {
 	t_token	*tokens;
 	t_node	*nodes;
@@ -88,32 +88,31 @@ void	shell(char *line, int *status)
 	tokens = tokenizer(line);
 	if (tokens == NULL)
 	{
-		*status = 258;
-		return;
+		set_status(258);
+		// *status = 258;
+		return ;
 	}
 	expand_tokens(tokens);
 	if (!check_syntax_error(tokens))
 	{
-		*status = 258;
+		set_status(258);
+		// *status = 258;
 		free_token_list(&tokens);
-		return;
+		return ;
 	}
-
 	nodes = parser(tokens);
 	if (!nodes)
 	{
 		free_token_list(&tokens);
-		return;
+		return ;
 	}
-
 	// printf("=== Syntax Tree ===\n");
 	// print_tree(nodes, 0);
 	open_redir_file(nodes);
-	*status = execution(nodes);
+	execution(nodes);
 	free_token_list(&tokens);
 	free_node(nodes);
 }
-
 
 // static void	signal_handler_test(int sig)
 // {
@@ -128,10 +127,10 @@ void	shell(char *line, int *status)
 
 int	main(void)
 {
-	int status;
+	// int status;
 	char *line;
 
-	status = 0;
+	// status = 0;
 	// signal(SIGINT, signal_handler_test);
 	while (1)
 	{
@@ -140,9 +139,9 @@ int	main(void)
 			break ;
 		if (*line)
 			add_history(line);
-		shell(line, &status);
+		shell(line);
 		free(line);
-		// break;
+		// break ;
 	}
-	exit(status);
+	exit(set_status(-1));
 }
