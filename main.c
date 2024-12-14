@@ -85,29 +85,48 @@ void	shell(char *line, int *status)
 	printf("=== Syntax Tree ===\n");
 	print_tree(nodes, 0);
 	printf("===================\n");
-    *status=execution(nodes);
+	*status = execution(nodes);
 	status = NULL;
 }
 
-
-static void	signal_handler_test(int sig)
+void	reset_prompt(void)
 {
-    // 改行と次のプロンプト表示
-    // printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
 	printf("\n");
-    // 必要なら手動でリフレッシュする
-    rl_on_new_line();  // 新しい行を作成
-    rl_replace_line("", 0);  // 現在の入力行をクリア
-    rl_redisplay();  // プロンプトを再表示
+	// 必要なら手動でリフレッシュする
+	rl_on_new_line();       // 新しい行を作成
+	rl_replace_line("", 0); // 現在の入力行をクリア
+	rl_redisplay();         // プロンプトを再表示
+}
+
+static void	signal_handler(int sig, siginfo_t *info, void *context)
+{
+	if (info->si_pid == 0)
+		return ;
+	// 改行と次のプロンプト表示
+	// printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
+	if (sig == SIGINT)
+		reset_prompt();
 }
 
 int	main(void)
 {
 	int status;
+	int *loading;
 	char *line;
 
 	status = 0;
-	signal(SIGINT, signal_handler_test);
+
+	struct sigaction sigaction_t;
+
+	sigaction_t.sa_flags = SA_SIGINFO;
+	sigaction_t.sa_sigaction = &signal_handler;
+	sigemptyset(&sigaction_t.sa_mask);
+	signal(SIGQUIT, SIG_IGN);
+	if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
+	{
+		perror("sigaction fatal error");
+	}
+
 	while (1)
 	{
 		line = readline("minishell$ ");
@@ -115,9 +134,9 @@ int	main(void)
 			break ;
 		if (*line)
 			add_history(line);
-		// 	break;
 		shell(line, &status);
 		free(line);
+		line = NULL;
 	}
 	exit(status);
 }

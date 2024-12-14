@@ -32,8 +32,9 @@ void	add_token(t_token **tok, t_token *elm)
 
 int	get_token_list_length(t_token *tok)
 {
-	int len = 0;
+	int	len;
 
+	len = 0;
 	while (tok != NULL && tok->type != TK_EOF)
 	{
 		len++;
@@ -42,8 +43,7 @@ int	get_token_list_length(t_token *tok)
 	return (len);
 }
 
-
-int is_blank(char c)
+int	is_blank(char c)
 {
 	if (c == ' ' || c == '\n')
 		return (1);
@@ -93,34 +93,88 @@ t_token	*operator(char **rest, char *line)
 	return (NULL);
 }
 
-void	handle_quote(char **line, char quote_type)
-{
-	char	*start;
-	char	*result;
+// TODO 後でquote処理で使うからの残しておく
+// void	handle_get_env(char *word)
+// {
+// 	char	*tmp;
+// 	char	*env_path;
+// 	char	*env_changed;
+// 	int		*env;
 
-	start = ++(*line);
-	while (**line && **line != quote_type)
-		(*line)++;
-	if (**line == '\0')
-	{
-		perror("Unclosed quote");
-	}
-	(*line)++;
-}
+// 	// TODO error handling check
+// 	if (!word)
+// 		return ;
+// 	tmp = word;
+// 	env = NULL;
+// 	while (*tmp && *tmp != ' ')
+// 	{
+// 		if (*tmp == '$')
+// 			env = *tmp;
+// 		tmp++;
+// 	}
+// 	env_path = ft_strndup(env + 1, tmp - env - 1);
+// 	if (!env_path)
+// 		return ;
+// 	env_changed = getenv(env_path);
+// 	if (!env_changed)
+
+// }
+
+// void	handle_quote(char **line, char *word)
+// {
+// 	char	*start;
+// 	char	*result;
+// 	int		quote_count;
+// 	int		double_quote_count;
+
+// 	start = ++(*line);
+// 	quote_count = 0;
+// 	double_quote_count = 0;
+// 	while (*start)
+// 	{
+// 		if (start == SINGLE_QUOTE)
+// 			quote_count++;
+// 		if (start == DOUBLE_QUOTE)
+// 			double_quote_count++;
+// 		(start)++;
+// 	}
+// 	if ((quote_count % 2 == 1) || (double_quote_count % 2 == 1))
+// 		perror("Unclosed quote");
+// 	// double quote
+// 	result = ft_strtrim(*line, "\"");
+// 	if (!result)
+// 	{
+// 		word = ft_strdup(ft_strtrim(*line, "\'"));
+// 		return ;
+// 	}
+// 	// single quote
+// 	// if (**line == '\0')
+// 	// {
+// 	// 	perror("Unclosed quote");
+// 	// }
+// 	// // single quote
+// 	// *quote_status = 1;
+// 	// // double quote
+// 	// *quote_status = 2;
+// 	(*line)++;
+// }
 
 t_token	*word(char **rest, char *line)
 {
 	const char	*start = line;
 	char		*word;
 
+	// int			quote_status;
+	// quote_status = 0;
 	while (*line && !is_meta(*line))
 	{
-		if (*line == SINGLE_QUOTE || *line == DOUBLE_QUOTE)
-		{
-			handle_quote(&line, *line);
-		}
-		else
-			line++;
+		// if (*line == SINGLE_QUOTE || *line == DOUBLE_QUOTE)
+		// {
+		// 	handle_quote(&line, *line);
+		// 	break ;
+		// }
+		// else
+		line++;
 	}
 	word = ft_strndup(start, line - start);
 	if (!word)

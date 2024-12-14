@@ -4,7 +4,8 @@
 # include <readline/readline.h>
 # include <signal.h>
 # include <string.h> //delete
-#include <sys/types.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 
 // struct
 enum						e_token_type
@@ -62,31 +63,16 @@ typedef struct s_node		t_node;
 
 // function
 
-//token_utility
-t_token	*new_token(char *word, t_token_type type);
-int is_blank(char c);
-int is_meta(char c);
-int	is_word(char c);
-t_token	*tokencpy(t_token *tok);
-int check_eof(t_token *tok);
-void	add_token(t_token **tok, t_token *elm);
-int token_is(t_token *token, const char *str);
-int	get_token_list_length(t_token *tok);
-
-//tokenizefunction
-t_token *operator(char **rest, char *line);
-void handle_quote(char **line, char quote_type);
-t_token *word(char **rest, char *line);
-t_token *tokenizer(char *line);
-
-//node
-t_node	*new_node(t_node_kind kind);
-void	add_node(t_node **node, t_node *elm);
-t_node	*redirect_out(t_token **rest, t_token *tok);
-t_node	*redirect_in(t_token **rest, t_token *tok);
-t_node *make_cmd_node(t_token **rest, t_token *tok);
-t_node	*pipeline(t_token **rest, t_token *tok);
-t_node	*parser(t_token *tok);
+// token_utility
+t_token						*new_token(char *word, t_token_type type);
+int							is_blank(char c);
+int							is_meta(char c);
+int							is_word(char c);
+t_token						*tokencpy(t_token *tok);
+int							check_eof(t_token *tok);
+void						add_token(t_token **tok, t_token *elm);
+int							token_is(t_token *token, const char *str);
+int							get_token_list_length(t_token *tok);
 
 // tokenizefunction
 t_token						*operator(char **rest, char *line);
@@ -94,13 +80,28 @@ void						handle_quote(char **line, char quote_type);
 t_token						*word(char **rest, char *line);
 t_token						*tokenizer(char *line);
 
-//exev
-int execution(t_node *node);
-pid_t run_pipeline(t_node *node);
-int wait_process(pid_t last_pid);
+// node
+t_node						*new_node(t_node_kind kind);
+void						add_node(t_node **node, t_node *elm);
+t_node						*redirect_out(t_token **rest, t_token *tok);
+t_node						*redirect_in(t_token **rest, t_token *tok);
+t_node						*make_cmd_node(t_token **rest, t_token *tok);
+t_node						*pipeline(t_token **rest, t_token *tok);
+t_node						*parser(t_token *tok);
 
-//free
-void wp_free(char ***str);
-void error_exit(char *msg);
+// tokenizefunction
+t_token						*operator(char **rest, char *line);
+void						handle_quote(char **line, char quote_type);
+t_token						*word(char **rest, char *line);
+t_token						*tokenizer(char *line);
+
+// exev
+int							execution(t_node *node);
+pid_t						run_pipeline(t_node *node);
+int							wait_process(pid_t last_pid);
+
+// free
+void						wp_free(char ***str);
+void						error_exit(char *msg);
 
 #endif
