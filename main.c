@@ -2,6 +2,11 @@
 #include <readline/history.h>
 #include <stdio.h>
 
+__attribute__((destructor)) static void destructor()
+{
+	system("leaks -q a.out");
+}
+
 // ノード種別を文字列に変換する関数
 // *第１引数 kind - ?
 const char	*node_kind_to_string(t_node_kind kind)
@@ -81,18 +86,32 @@ void	shell(char *line, int *status)
 	t_node	*nodes;
 
 	tokens = tokenizer(line);
+	if (tokens == NULL)
+	{
+		*status = 258; // bashの構文エラー時の終了ステータス
+		return ;
+	}
+	if (!check_syntax_error(tokens))
+	{
+		*status = 258;
+		free_token_list(&tokens);
+		return ;
+	}
 	nodes = parser(tokens);
 	printf("=== Syntax Tree ===\n");
 	print_tree(nodes, 0);
-	printf("===================\n");
+	open_redir_file(nodes);
 	*status = execution(nodes);
-	status = NULL;
+	free_token_list(&tokens);
+	free_node(nodes);
+	// printf("===================\n");
+	// *status = execution(nodes);
+	// status = NULL;
 }
 
 void	reset_prompt(void)
 {
 	printf("\n");
-	// 必要なら手動でリフレッシュする
 	rl_on_new_line();       // 新しい行を作成
 	rl_replace_line("", 0); // 現在の入力行をクリア
 	rl_redisplay();         // プロンプトを再表示
@@ -102,8 +121,6 @@ static void	signal_handler(int sig, siginfo_t *info, void *context)
 {
 	if (info->si_pid == 0)
 		return ;
-	// 改行と次のプロンプト表示
-	// printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
 	if (sig == SIGINT)
 		reset_prompt();
 }
@@ -127,6 +144,7 @@ int	main(void)
 		perror("sigaction fatal error");
 	}
 
+	// signal(SIGINT, signal_handler_test);
 	while (1)
 	{
 		line = readline("minishell$ ");
@@ -136,7 +154,7 @@ int	main(void)
 			add_history(line);
 		shell(line, &status);
 		free(line);
-		line = NULL;
+		break ;
 	}
 	exit(status);
 }

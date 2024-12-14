@@ -1,33 +1,6 @@
 #include "minishell.h"
 #include <errno.h>
 
-void	wp_free(char ***str)
-{
-	int	i;
-
-	if (!str || !*str)
-		return ;
-	i = 0;
-	while ((*str)[i])
-	{
-		free((*str)[i]);
-		(*str)[i] = NULL;
-		i++;
-	}
-	free(*str);
-	*str = NULL;
-}
-
-void	error_exit(char *msg)
-{
-	const char	*red = "\033[31m";
-	const char	*reset = "\033[0m";
-
-	write(2, red, 5);
-	ft_putendl_fd(msg, 2);
-	write(2, reset, 4);
-	exit(EXIT_FAILURE);
-}
 static char	*find_path(char **path_arr, const char *cmd)
 {
 	char	*part_path;
@@ -105,7 +78,7 @@ static char	**token_to_argv(t_token *tok)
 	i = 0;
 	while (tok != NULL && tok->type != TK_EOF)
 	{
-		argv[i] = strdup(tok->word);
+		argv[i] = ft_strdup(tok->word);
 		if (argv[i] == NULL)
 		{
 			wp_free(&argv);
@@ -127,36 +100,37 @@ pid_t	run_pipeline(t_node *node)
 	pid_t		pid;
 	char		**argv;
 
-	if (node == NULL)
-		return (-1);
-	current_node = node;
-	while (current_node != NULL)
-	{
-		if (current_node && current_node->next)
-			init_pipe(current_node);
-		pid = fork();
-		if (pid < 0)
-		{
-			perror("fork");
-		}
-		else if (pid == 0)
-		{
-			connect_pipe(current_node);
-			argv = token_to_argv(current_node->command->args);
-			cmd = argv[0];
-			path = make_path(cmd);
-			if (!path)
-				perror("command not found");
-			execve(path, argv, environ);
-			perror("execve");
-		}
-		if (current_node->inpipe[0] != STDIN_FILENO)
+    if (node == NULL)
+        return -1;
+    current_node = node; 
+    while (current_node != NULL)
+    {
+        if(current_node && current_node->next)
+            init_pipe(current_node);
+        pid = fork();
+        if (pid < 0)
+        {
+            perror("fork");
+        }
+        else if (pid == 0)
+        {
+            connect_pipe(current_node);
+			redirect(current_node->command->redirects);
+            argv = token_to_argv(current_node->command->args);
+            cmd = argv[0];
+            path = make_path(cmd);
+            if(!path)
+                perror("command not found");
+            execve(path, argv, environ);
+            perror("execve");
+        }
+        if (current_node->inpipe[0] != STDIN_FILENO)
 			close(current_node->inpipe[0]);
-		if (current_node->next)
+	    if (current_node->next)
 			close(current_node->outpipe[1]);
-		current_node = current_node->next;
-	}
-	return (pid);
+        current_node = current_node->next; 
+    }
+    return pid;
 }
 
 int	wait_process(pid_t last_pid)

@@ -52,7 +52,17 @@ t_node	*redirect_out(t_token **rest, t_token *tok)
 
 	node = new_node(ND_REDIR_OUT);
 	node->filename = tokencpy(tok->next);
-	node->targetfd = -1;
+	node->default_fd = STDOUT_FILENO;
+	*rest = tok->next->next;
+	return (node);
+}
+t_node	*redirect_append(t_token **rest, t_token *tok)
+{
+	t_node	*node;
+
+	node = new_node(ND_REDIR_APPEND);
+	node->filename = tokencpy(tok->next);
+	node->default_fd = STDOUT_FILENO;
 	*rest = tok->next->next;
 	return (node);
 }
@@ -63,7 +73,17 @@ t_node	*redirect_in(t_token **rest, t_token *tok)
 
 	node = new_node(ND_REDIR_IN);
 	node->filename = tokencpy(tok->next);
-	node->targetfd = -1;
+	node->default_fd = STDIN_FILENO;
+	*rest = tok->next->next;
+	return (node);
+}
+t_node	*redirect_heredoc(t_token **rest, t_token *tok)
+{
+	t_node	*node;
+
+	node = new_node(ND_REDIR_HEREDOC);
+	node->delimiter = tokencpy(tok->next);
+	node->default_fd = STDIN_FILENO;
 	*rest = tok->next->next;
 	return (node);
 }
@@ -72,25 +92,27 @@ t_node	*make_cmd_node(t_token **rest, t_token *tok)
 {
 	t_node	*node;
 
-	node = new_node(ND_SIMPLE_CMD);
-	while (tok && !check_eof(tok) && !token_is(tok, "|") && !token_is(tok,
-			"\n"))
-	{
-		if (tok->type == TK_WORD)
-		{
-			add_token(&node->args, tokencpy(tok));
-			tok = tok->next;
-		}
-		else if (token_is(tok, ">") && tok->next && tok->next->type == TK_WORD)
-			add_node(&node->redirects, redirect_out(&tok, tok));
-		else if (token_is(tok, "<") && tok->next && tok->next->type == TK_WORD)
-			add_node(&node->redirects, redirect_in(&tok, tok));
-		// add other redirect
-		else
-			perror("parse,error");
-	}
-	*rest = tok;
-	return (node);
+    node = new_node(ND_SIMPLE_CMD);
+    while (tok && !check_eof(tok) && !token_is(tok,"|") && !token_is(tok,"\n"))
+    {
+        if (tok->type == TK_WORD)
+        {
+            add_token(&node->args, tokencpy(tok));
+            tok = tok->next;
+        }
+        else if (token_is(tok, ">") && tok->next && tok->next->type == TK_WORD)
+        	add_node(&node->redirects, redirect_out(&tok, tok));
+        else if (token_is(tok, "<") && tok->next && tok->next->type == TK_WORD)
+            add_node(&node->redirects, redirect_in(&tok, tok));
+		else if (token_is(tok, ">>") && tok->next->type == TK_WORD)
+			add_node(&node->redirects, redirect_append(&tok, tok));
+		else if (token_is(tok, "<<") && tok->next->type == TK_WORD)
+			add_node(&node->redirects, redirect_heredoc(&tok, tok));
+        else
+            perror("parse,error");
+    }
+    *rest = tok;
+    return node;
 }
 
 t_node	*pipeline(t_token **rest, t_token *tok)
@@ -116,3 +138,5 @@ t_node	*parser(t_token *tok)
 {
 	return (pipeline(&tok, tok));
 }
+
+

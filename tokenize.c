@@ -53,7 +53,7 @@ int	is_blank(char c)
 
 int	is_meta(char c)
 {
-	if (is_blank(c) || (c && ft_strchr("|<>\n", c)))
+	if (is_blank(c) || (c && ft_strchr("|<>&()\n", c)))
 		return (1);
 	else
 		return (0);
@@ -158,11 +158,35 @@ t_token	*operator(char **rest, char *line)
 // 	// *quote_status = 2;
 // 	(*line)++;
 // }
+bool handle_quote(char **line, char quote_type, t_quote_state *quote)
+{
+	(*line)++;
+	if (quote_type == SINGLE_QUOTE)
+		quote->in_single_quote = true;
+	else if (quote_type == DOUBLE_QUOTE)
+		quote->in_double_quote = true;
+	
+	while (**line)
+	{
+		if (**line == quote_type)
+		{
+			(*line)++;
+			if (quote_type == SINGLE_QUOTE)
+				quote->in_single_quote = false;
+			else if (quote_type == DOUBLE_QUOTE)
+				quote->in_double_quote = false;
+			return true;
+		}
+		(*line)++;
+	}
+	return false;
+}
 
 t_token	*word(char **rest, char *line)
 {
 	const char	*start = line;
 	char		*word;
+	t_quote_state quote = {false, false};
 
 	// int			quote_status;
 	// quote_status = 0;
@@ -175,12 +199,36 @@ t_token	*word(char **rest, char *line)
 		// }
 		// else
 		line++;
+		if (*line == SINGLE_QUOTE && !quote.in_double_quote)
+		{
+			if (!handle_quote(&line, SINGLE_QUOTE, &quote))
+			{
+				perror("Unclosed quote");
+				return NULL;
+			}
+			continue;
+		}
+		else if (*line == DOUBLE_QUOTE && !quote.in_single_quote)
+		{
+			if (!handle_quote(&line, DOUBLE_QUOTE, &quote))
+			{
+				perror("Unclosed quote");
+				return NULL;
+			}
+			continue;
+		}
+		line++;
+	}
+	if (quote.in_single_quote || quote.in_double_quote)//冗長かも
+	{
+		perror("Unclosed quote");
+		return NULL;
 	}
 	word = ft_strndup(start, line - start);
 	if (!word)
-		perror("strndup");
+		return NULL;
 	*rest = line;
-	return (new_token(word, TK_WORD));
+	return new_token(word, TK_WORD);
 }
 
 t_token	*tokenizer(char *line)
@@ -197,16 +245,92 @@ t_token	*tokenizer(char *line)
 		else if (is_meta(*line))
 		{
 			tok->next = operator(&line, line);
+			if (tok->next == NULL)
+			{
+				free_token_list(&head.next);
+				return (NULL);
+			}
 			tok = tok->next;
 		}
 		else if (is_word(*line))
 		{
 			tok->next = word(&line, line);
+			if (tok->next == NULL)
+			{
+				free_token_list(&head.next);
+				return (NULL);
+			}
 			tok = tok->next;
 		}
 		else
-			perror("Unexpected Token");
+		{
+			free_token_list(&head.next);
+			ft_putstr_fd("minishell: syntax error near unexpected token\n", STDERR_FILENO);
+			return (NULL);
+		}
 	}
 	tok->next = new_token(NULL, TK_EOF);
 	return (head.next);
+}
+
+
+//↓構文のエラーチェック
+static bool check_pipe_error(t_token *current)
+{
+    if (!current->next || current->next->type == TK_EOF)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", STDERR_FILENO);
+        return false;
+    }
+    if (token_is(current->next, "|"))
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", STDERR_FILENO);
+        return false;
+    }
+    return true;
+}
+
+static bool is_redirect_token(t_token *token)
+{
+    return (token_is(token, ">") || token_is(token, "<") || 
+            token_is(token, ">>") || token_is(token, "<<"));
+}
+
+static bool check_redirect_filename_error(t_token *current)
+{
+    if (!current->next || current->next->type != TK_WORD)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", STDERR_FILENO);
+        return false;
+    }
+    return true;
+}
+
+static bool check_consecutive_redirect_error(t_token *current)
+{
+    if (is_redirect_token(current) && is_redirect_token(current->next))
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `", STDERR_FILENO);
+        ft_putstr_fd(current->next->word, STDERR_FILENO);
+        ft_putstr_fd("'\n", STDERR_FILENO);
+        return false;
+    }
+    return true;
+}
+
+bool check_syntax_error(t_token *tokens)
+{
+    t_token *current = tokens;
+
+    while (current && current->type != TK_EOF)
+    {
+        if (token_is(current, "|") && !check_pipe_error(current))
+            return false;
+        if (is_redirect_token(current) && !check_redirect_filename_error(current))
+            return false;
+        if (!check_consecutive_redirect_error(current))
+            return false;
+        current = current->next;
+    }
+    return true;
 }

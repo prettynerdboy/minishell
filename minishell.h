@@ -3,11 +3,15 @@
 # include "libft/libft.h"
 # include <readline/readline.h>
 # include <signal.h>
-# include <string.h> //delete
+# include <errno.h>
+# include <fcntl.h>
+# include <readline/readline.h>
+# include <stdbool.h>
+# include <stdlib.h>
 # include <sys/types.h>
-# include <sys/wait.h>
+# include <unistd.h>
 
-// struct
+			// struct
 enum						e_token_type
 {
 	TK_WORD,
@@ -24,6 +28,12 @@ struct						s_token
 };
 typedef struct s_token		t_token;
 
+typedef struct s_quote_state
+{
+	bool					in_single_quote;
+	bool					in_double_quote;
+}							t_quote_state;
+
 enum						e_node_kind
 {
 	ND_PIPELINE,
@@ -38,20 +48,16 @@ typedef enum e_node_kind	t_node_kind;
 struct						s_node
 {
 	t_node_kind				kind;
-	struct s_node			*next;
-
-	t_token					*args;
+	struct s_node			*command;
 	struct s_node			*redirects;
-
-	int						targetfd;
+	t_token					*args;
 	t_token					*filename;
 	t_token					*delimiter;
-	int						filefd;
-	int						stashed_targetfd;
-
+	int						default_fd;
+	int						redirect_fd;
 	int						inpipe[2];
 	int						outpipe[2];
-	struct s_node			*command;
+	struct s_node			*next;
 };
 typedef struct s_node		t_node;
 
@@ -76,9 +82,30 @@ int							get_token_list_length(t_token *tok);
 
 // tokenizefunction
 t_token						*operator(char **rest, char *line);
-void						handle_quote(char **line, char quote_type);
+bool						handle_quote(char **line, char quote_type,
+								t_quote_state *quote);
 t_token						*word(char **rest, char *line);
 t_token						*tokenizer(char *line);
+
+// checksyntax
+bool						check_syntax_error(t_token *tokens);
+
+// node
+t_node						*new_node(t_node_kind kind);
+void						add_node(t_node **node, t_node *elm);
+t_node						*redirect_out(t_token **rest, t_token *tok);
+t_node						*redirect_in(t_token **rest, t_token *tok);
+t_node						*redirect_append(t_token **rest, t_token *tok);
+t_node						*redirect_heredoc(t_token **rest, t_token *tok);
+t_node						*make_cmd_node(t_token **rest, t_token *tok);
+t_node						*pipeline(t_token **rest, t_token *tok);
+t_node						*parser(t_token *tok);
+
+// redirect
+int							open_redir_file(t_node *node);
+int							handle_redirection(t_node *node);
+void						redirect(t_node *redir);
+int							handle_heredoc(t_node *redirect_node);
 
 // node
 t_node						*new_node(t_node_kind kind);
@@ -89,19 +116,10 @@ t_node						*make_cmd_node(t_token **rest, t_token *tok);
 t_node						*pipeline(t_token **rest, t_token *tok);
 t_node						*parser(t_token *tok);
 
-// tokenizefunction
-t_token						*operator(char **rest, char *line);
-void						handle_quote(char **line, char quote_type);
-t_token						*word(char **rest, char *line);
-t_token						*tokenizer(char *line);
-
-// exev
-int							execution(t_node *node);
-pid_t						run_pipeline(t_node *node);
-int							wait_process(pid_t last_pid);
-
 // free
 void						wp_free(char ***str);
 void						error_exit(char *msg);
+void						free_token_list(t_token **head);
+void						free_node(t_node *node);
 
 #endif
