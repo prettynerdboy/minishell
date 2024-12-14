@@ -86,6 +86,9 @@ t_token *tokenizer(char *line);
 //checksyntax
 bool check_syntax_error(t_token *tokens);
 
+//expand
+void expand_tokens(t_token *tokens);
+
 //node
 t_node	*new_node(t_node_kind kind);
 void	add_node(t_node **node, t_node *elm);

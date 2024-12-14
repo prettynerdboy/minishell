@@ -7,7 +7,6 @@ void free_token_list(t_token **head)
 
     if (!head || !*head) 
         return;
-
     current = *head;
     while (current)
     {

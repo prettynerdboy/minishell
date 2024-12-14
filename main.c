@@ -88,10 +88,10 @@ void	shell(char *line, int *status)
 	tokens = tokenizer(line);
 	if (tokens == NULL)
 	{
-		*status = 258;  // bashの構文エラー時の終了ステータス
+		*status = 258;
 		return;
 	}
-	
+	expand_tokens(tokens);
 	if (!check_syntax_error(tokens))
 	{
 		*status = 258;
@@ -100,8 +100,14 @@ void	shell(char *line, int *status)
 	}
 
 	nodes = parser(tokens);
-	printf("=== Syntax Tree ===\n");
-	print_tree(nodes, 0);
+	if (!nodes)
+	{
+		free_token_list(&tokens);
+		return;
+	}
+
+	// printf("=== Syntax Tree ===\n");
+	// print_tree(nodes, 0);
 	open_redir_file(nodes);
 	*status = execution(nodes);
 	free_token_list(&tokens);
@@ -136,7 +142,7 @@ int	main(void)
 			add_history(line);
 		shell(line, &status);
 		free(line);
-		break;
+		// break;
 	}
 	exit(status);
 }
