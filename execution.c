@@ -120,9 +120,13 @@ pid_t	run_pipeline(t_node *node)
 			cmd = argv[0];
 			path = make_path(cmd);
 			if (!path)
+			{
 				perror("command not found");
+				exit(EXIT_FAILURE);
+			}
 			execve(path, argv, environ);
 			perror("execve");
+			exit(EXIT_FAILURE);
 		}
 		if (current_node->inpipe[0] != STDIN_FILENO)
 			close(current_node->inpipe[0]);
@@ -133,28 +137,29 @@ pid_t	run_pipeline(t_node *node)
 	return (pid);
 }
 
-void	wait_process(pid_t last_pid)
+int	wait_process(pid_t last_pid)
 {
+	int		status;
 	pid_t	child_pid;
 	int		child_status;
 
-	// int status = 0;
+	status = 0;
 	while ((child_pid = wait(&child_status)) > 0)
 	{
 		if (child_pid == last_pid)
-			set_status(WEXITSTATUS(child_status));
+			status = WEXITSTATUS(child_status);
 	}
 	if (child_pid == -1 && errno != ECHILD)
 		perror("wait");
-	// return (status);
+	return (status);
 }
 
-void	execution(t_node *node)
+int	execution(t_node *node)
 {
+	int		status;
 	pid_t	pid;
 
-	// int		status;
 	pid = run_pipeline(node);
-	wait_process(pid);
-	// return (status);
+	status = wait_process(pid);
+	return (status);
 }

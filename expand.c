@@ -1,33 +1,32 @@
 #include "minishell.h"
 
-// extern int g_status = 0; //多分ヘッダファイルに記述、externいらんけど仮
-
-static char *ft_strjoin_free(char *s1, char *s2)
+static char	*ft_strjoin_free(char *s1, char *s2)
 {
-    char *result;
-    
-    if (!s1 && !s2)
-        return (NULL);
-    if (!s1)
-        return (ft_strdup(s2));
-    if (!s2)
-        return (s1);
-    
-    result = ft_strjoin(s1, s2);
-    free(s1); 
-    return (result);
+	char	*result;
+
+	if (!s1 && !s2)
+		return (NULL);
+	if (!s1)
+		return (ft_strdup(s2));
+	if (!s2)
+		return (s1);
+	result = ft_strjoin(s1, s2);
+	free(s1);
+	return (result);
 }
 
-static char *handle_status_var(int *i)
+static char	*handle_status_var(int *i)
 {
-	char *var_value;
+	int		*status;
+	char	*var_value;
 
-	var_value = ft_itoa(set_status(-1));
+	status = get_status();
+	var_value = ft_itoa(*status);
 	(*i)++;
 	return (var_value);
 }
 
-static char *get_var_name(char *str, int *i, int start)
+static char	*get_var_name(char *str, int *i, int start)
 {
 	int		len;
 	char	*var_name;
@@ -44,7 +43,7 @@ static char *get_var_name(char *str, int *i, int start)
 	return (var_name);
 }
 
-static char *expand_env_var(char *str, int *i)
+static char	*expand_env_var(char *str, int *i)
 {
 	char	*var_name;
 	char	*var_value;
@@ -64,10 +63,10 @@ static char *expand_env_var(char *str, int *i)
 	return (ft_strdup(""));
 }
 
-static char *process_single_quote(char *str, int *i)
+static char	*process_single_quote(char *str, int *i)
 {
-	int		start;
-	int		len;
+	int	start;
+	int	len;
 
 	start = *i + 1;
 	len = 0;
@@ -82,9 +81,9 @@ static char *process_single_quote(char *str, int *i)
 	return (ft_substr(str, start, len));
 }
 
-static char *handle_dollar_in_dquote(char *str, int *i, char *result)
+static char	*handle_dollar_in_dquote(char *str, int *i, char *result)
 {
-	char *tmp;
+	char	*tmp;
 
 	tmp = expand_env_var(str, i);
 	result = ft_strjoin_free(result, tmp);
@@ -92,9 +91,9 @@ static char *handle_dollar_in_dquote(char *str, int *i, char *result)
 	return (result);
 }
 
-static char *handle_char_in_dquote(char *str, int *i, char *result)
+static char	*handle_char_in_dquote(char *str, int *i, char *result)
 {
-	char *tmp;
+	char	*tmp;
 
 	tmp = ft_substr(str, *i, 1);
 	result = ft_strjoin_free(result, tmp);
@@ -103,9 +102,9 @@ static char *handle_char_in_dquote(char *str, int *i, char *result)
 	return (result);
 }
 
-static char *process_double_quote(char *str, int *i)
+static char	*process_double_quote(char *str, int *i)
 {
-	char *result;
+	char	*result;
 
 	result = ft_strdup("");
 	(*i)++;
@@ -129,12 +128,14 @@ static char *process_double_quote(char *str, int *i)
 	return (result);
 }
 
-static char *expand_word(char *word)
+static char	*expand_word(char *word)
 {
-	char *result = ft_strdup("");
-	char *tmp;
-	int i = 0;
+	char	*result;
+	char	*tmp;
+	int		i;
 
+	result = ft_strdup("");
+	i = 0;
 	while (word[i])
 	{
 		if (word[i] == '\'')
@@ -166,7 +167,7 @@ static char *expand_word(char *word)
 	return (result);
 }
 
-void expand_tokens(t_token *tokens)
+void	expand_tokens(t_token *tokens)
 {
 	t_token *current;
 	char *expanded;
@@ -182,4 +183,4 @@ void expand_tokens(t_token *tokens)
 		}
 		current = current->next;
 	}
-} 
+}

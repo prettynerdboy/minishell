@@ -80,58 +80,99 @@ void	print_tree(t_node *node, int depth)
 // shell起動関数
 // *第１引数 line - 入力されたコマンドライン文字列
 // *第２引数 status - ?
-void	shell(char *line)
+void	shell(char *line, int *status)
 {
-	t_token	*tokens;
-	t_node	*nodes;
+	t_data	*data;
 
-	tokens = tokenizer(line);
-	if (tokens == NULL)
+	data = get_data();
+	data->tokens = tokenizer(line);
+	if (data->tokens == NULL)
 	{
-		set_status(258);
-		// *status = 258;
+		*status = 258;
 		return ;
 	}
-	expand_tokens(tokens);
-	if (!check_syntax_error(tokens))
+	expand_tokens(data->tokens);
+	if (!check_syntax_error(data->tokens))
 	{
-		set_status(258);
-		// *status = 258;
-		free_token_list(&tokens);
+		*status = 258;
+		free_token_list(&data->tokens);
 		return ;
 	}
-	nodes = parser(tokens);
-	if (!nodes)
+	data->nodes = parser(data->tokens);
+	if (!data->nodes)
 	{
-		free_token_list(&tokens);
+		free_token_list(&data->tokens);
 		return ;
 	}
 	// printf("=== Syntax Tree ===\n");
 	// print_tree(nodes, 0);
-	open_redir_file(nodes);
-	execution(nodes);
-	free_token_list(&tokens);
-	free_node(nodes);
+	open_redir_file(data->nodes);
+	*status = execution(data->nodes);
+	free_token_list(&data->tokens);
+	data->tokens = NULL;
+	free_node(data->nodes);
+	data->nodes = NULL;
+	// printf("===================\n");
+	// *status = execution(nodes);
+	// status = NULL;
 }
 
-// static void	signal_handler_test(int sig)
-// {
-//     // 改行と次のプロンプト表示
-//     // printf("\n(SIGINT を検出しました) 次の操作を入力してください。\n");
-// 	printf("\n");
-//     // 必要なら手動でリフレッシュする
-//     rl_on_new_line();  // 新しい行を作成
-//     rl_replace_line("", 0);  // 現在の入力行をクリア
-//     rl_redisplay();  // プロンプトを再表示
-// }
+void	reset_prompt(void)
+{
+	int	*status;
+
+	status = get_status();
+	printf("\n");
+	rl_on_new_line();       // 新しい行を作成
+	rl_replace_line("", 0); // 現在の入力行をクリア
+	rl_redisplay();         // プロンプトを再表示
+	*status = SIGINT_STATUS;
+}
+
+static void	signal_handler(int sig, siginfo_t *info, void *context)
+{
+	int		status;
+	t_data	*data;
+
+	data = get_data();
+	(void *)context;
+	if (info->si_pid == 0)
+		return ;
+	if (sig == SIGINT)
+	{
+		status = *get_status();
+		reset_prompt();
+		if (status == 1)
+			return ;
+		if (data->tokens != NULL)
+		{
+			free_token_list(&data->tokens);
+			data->tokens = NULL;
+		}
+		if (data->nodes != NULL)
+		{
+			free_node(data->nodes);
+			data->nodes = NULL;
+		}
+	}
+}
 
 int	main(void)
 {
-	// int status;
+	int *status;
+	int *loading;
 	char *line;
 
-	// status = 0;
-	// signal(SIGINT, signal_handler_test);
+	struct sigaction sigaction_t;
+
+	sigaction_t.sa_flags = SA_SIGINFO;
+	sigaction_t.sa_sigaction = &signal_handler;
+	sigemptyset(&sigaction_t.sa_mask);
+	signal(SIGQUIT, SIG_IGN);
+	if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
+		perror("sigaction fatal error");
+
+	status = get_status();
 	while (1)
 	{
 		line = readline("minishell$ ");
@@ -139,9 +180,9 @@ int	main(void)
 			break ;
 		if (*line)
 			add_history(line);
-		shell(line);
+		shell(line, status);
 		free(line);
 		// break ;
 	}
-	exit(set_status(-1));
+	exit(*status);
 }

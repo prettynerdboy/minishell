@@ -60,12 +60,20 @@ struct						s_node
 };
 typedef struct s_node		t_node;
 
+// 必要な構造体の宣言
+typedef struct s_data
+{
+	t_token					*tokens;
+	t_node					*nodes;
+}							t_data;
+
 // macro
 # define SINGLE_QUOTE '\''
 # define DOUBLE_QUOTE '"'
 # define READ 0
 # define WRITE 1
-
+# define SIGINT_STATUS 130
+# define TOKEN_PARSE_ERROR_STATUS 258
 // function
 
 // token_utility
@@ -110,9 +118,9 @@ void						redirect(t_node *redir);
 int							handle_heredoc(t_node *redirect_node);
 
 // exev
-void						execution(t_node *node);
+int							execution(t_node *node);
 pid_t						run_pipeline(t_node *node);
-void						wait_process(pid_t last_pid);
+int							wait_process(pid_t last_pid);
 
 // free
 void						wp_free(char ***str);
@@ -121,6 +129,7 @@ void						free_token_list(t_token **head);
 void						free_node(t_node *node);
 
 // status
-int							set_status(int status);
+int							*get_status(void);
+t_data						*get_data(void);
 
 #endif
