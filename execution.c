@@ -109,7 +109,7 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
-pid_t	run_pipeline(t_node *node)
+pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
 	extern char	**environ;
@@ -118,9 +118,9 @@ pid_t	run_pipeline(t_node *node)
 	pid_t		pid;
 	char		**argv;
 
-	if (node == NULL)
+    if (data == NULL || data->nodes == NULL)
 		return (-1);
-	current_node = node;
+	current_node = data->nodes;
 	while (current_node != NULL)
 	{
 		if (current_node && current_node->next)
@@ -140,42 +140,52 @@ pid_t	run_pipeline(t_node *node)
 		if (pid < 0)
 		{
 			perror("fork");
+			return (-1);
 		}
 		else if (pid == 0)
 		{//小プロのエラー時に、エラー起きたらノードとか全部フリー
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
+                free_data(&data);
 				exit(1); 
 			}
 			redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
+                free_data(&data);
 				exit(0);
 			}
 			path = make_path(cmd);
 			if (!path)
 			{
+                write(2,"test",4);
 				wp_free(&argv);
-				perror("command not found");
+				ft_putendl_fd(": command not found", STDERR_FILENO);
+                free_data(&data);
+                write(2,"test2",5);
 				exit(127);
 			}
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
 			perror("execve");
+            free_data(&data);
 			exit(EXIT_FAILURE);
 		}
-		if (current_node->inpipe[READ] != STDIN_FILENO)
+		else
+		{
+			if (current_node->inpipe[READ] != STDIN_FILENO)
 			close(current_node->inpipe[READ]);
-		if (current_node->inpipe[WRITE] != STDOUT_FILENO)
+			if (current_node->inpipe[WRITE] != STDOUT_FILENO)
 			close(current_node->inpipe[WRITE]);
-		if (current_node->outpipe[READ] != STDIN_FILENO)
+		    if (current_node->outpipe[READ] != STDIN_FILENO)
 			close(current_node->outpipe[READ]);
-		if (current_node->outpipe[WRITE] != STDOUT_FILENO)
+			if (current_node->outpipe[WRITE] != STDOUT_FILENO)
 			close(current_node->outpipe[WRITE]);
-		current_node = current_node->next;
+		}
+        current_node = current_node->next;
 	}
 	return (pid);
 }
@@ -192,17 +202,15 @@ int	wait_process(pid_t last_pid)
 		if (child_pid == last_pid)
 			status = WEXITSTATUS(child_status);
 	}
-	if (child_pid == -1 && errno != ECHILD)
-		perror("wait");
 	return (status);
 }
 
-int	execution(t_node *node)
+int	execution(t_data *data)
 {
 	int		status;
 	pid_t	pid;
 
-	pid = run_pipeline(node);
+	pid = run_pipeline(data);
 	status = wait_process(pid);
 	return (status);
 }

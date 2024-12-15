@@ -3,11 +3,11 @@
 # include "libft/libft.h"
 # include <errno.h>
 # include <fcntl.h>
+# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
 # include <unistd.h>
@@ -120,15 +120,16 @@ int							redirect(t_node *redir);
 int							handle_heredoc(t_node *redirect_node);
 
 // exev
-int							execution(t_node *node);
-pid_t						run_pipeline(t_node *node);
+int							execution(t_data *data);
+pid_t						run_pipeline(t_data *data);
 int							wait_process(pid_t last_pid);
 
 // free
 void						wp_free(char ***str);
 void						error_exit(char *msg);
 void						free_token_list(t_token **head);
-void						free_node(t_node *node);
+void						free_node(t_node **node);
+void						free_data(t_data **data);
 
 // status
 int							*get_status(void);
