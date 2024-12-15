@@ -6,7 +6,7 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/15 23:45:32 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/16 02:17:30 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,7 @@ $(NAME): $(OBJS)
 clean:
 	rm -f $(OBJS)
 	$(MAKE) -C $(LIB_DIR) clean
+
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIB_DIR) fclean

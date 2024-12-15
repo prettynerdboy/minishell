@@ -100,11 +100,10 @@ static char	**token_to_argv(t_token *tok)
 
 int	check_builtin(char *cmd)
 {
-	if (ft_strcmp(cmd, "echo") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "cd") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "pwd") == 0)
+	if (ft_strcmp(cmd, "echo") == 0 || ft_strcmp(cmd, "cd") == 0
+		|| ft_strcmp(cmd, "pwd") == 0 || ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "env") == 0
+		|| ft_strcmp(cmd, "exit") == 0)
 		return (1);
 	return (0);
 }
@@ -138,15 +137,13 @@ pid_t	run_pipeline(t_node *node)
 		}
 		pid = fork();
 		if (pid < 0)
-		{
 			perror("fork");
-		}
 		else if (pid == 0)
-		{//小プロのエラー時に、エラー起きたらノードとか全部フリー
+		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
-				exit(1); 
+				exit(1);
 			}
 			redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
