@@ -56,13 +56,20 @@ static void	init_pipe(t_node *node)
 
 static void	connect_pipe(t_node *node)
 {
-	close(node->outpipe[READ]);
-	dup2(node->inpipe[READ], STDIN_FILENO);
 	if (node->inpipe[READ] != STDIN_FILENO)
+	{
+		dup2(node->inpipe[READ], STDIN_FILENO);
 		close(node->inpipe[READ]);
-	dup2(node->outpipe[WRITE], STDOUT_FILENO);
+	}
 	if (node->outpipe[WRITE] != STDOUT_FILENO)
+	{
+		dup2(node->outpipe[WRITE], STDOUT_FILENO);
 		close(node->outpipe[WRITE]);
+	}
+	if (node->inpipe[WRITE] != STDOUT_FILENO)
+		close(node->inpipe[WRITE]);
+	if (node->outpipe[READ] != STDIN_FILENO)
+		close(node->outpipe[READ]);
 }
 
 static char	**token_to_argv(t_token *tok)
@@ -118,20 +125,32 @@ pid_t	run_pipeline(t_node *node)
 			redirect(current_node->command->redirects);
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];
+			if (!cmd)
+            {
+                wp_free(&argv);
+                exit(0);
+            }
 			path = make_path(cmd);
 			if (!path)
 			{
+				wp_free(&argv);
 				perror("command not found");
-				exit(EXIT_FAILURE);
+				exit(127);
 			}
 			execve(path, argv, environ);
+			free(path);
+			wp_free(&argv);
 			perror("execve");
 			exit(EXIT_FAILURE);
 		}
-		if (current_node->inpipe[0] != STDIN_FILENO)
-			close(current_node->inpipe[0]);
-		if (current_node->next)
-			close(current_node->outpipe[1]);
+		if (current_node->inpipe[READ] != STDIN_FILENO)
+			close(current_node->inpipe[READ]);
+		if (current_node->inpipe[WRITE] != STDOUT_FILENO)
+			close(current_node->inpipe[WRITE]);
+		if (current_node->outpipe[READ] != STDIN_FILENO)
+			close(current_node->outpipe[READ]);
+		if (current_node->outpipe[WRITE] != STDOUT_FILENO)
+			close(current_node->outpipe[WRITE]);
 		current_node = current_node->next;
 	}
 	return (pid);

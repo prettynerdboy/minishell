@@ -1,9 +1,11 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 # include "libft/libft.h"
+# include <stdio.h> //for mac
 # include <errno.h>
 # include <fcntl.h>
 # include <readline/readline.h>
+# include <readline/history.h>
 # include <signal.h>
 # include <stdbool.h>
 # include <stdlib.h>

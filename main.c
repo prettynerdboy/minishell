@@ -1,6 +1,5 @@
 #include "minishell.h"
-#include <readline/history.h>
-#include <stdio.h>
+
 
 __attribute__((destructor)) static void destructor()
 {
