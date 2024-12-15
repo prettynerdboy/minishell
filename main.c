@@ -1,10 +1,10 @@
 #include "minishell.h"
 
 
-__attribute__((destructor)) static void destructor()
-{
-	system("leaks -q my_minishell");
-}
+// __attribute__((destructor)) static void destructor()
+// {
+// 	system("leaks -q my_minishell");
+// }
 
 // ノード種別を文字列に変換する関数
 // *第１引数 kind - ?

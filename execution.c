@@ -109,6 +109,18 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
+static void close_pipe_fds(t_node *node)
+{
+    if (node->inpipe[READ] != STDIN_FILENO)
+        close(node->inpipe[READ]);
+    if (node->inpipe[WRITE] != STDOUT_FILENO)
+        close(node->inpipe[WRITE]);
+    if (node->outpipe[READ] != STDIN_FILENO)
+        close(node->outpipe[READ]);
+    if (node->outpipe[WRITE] != STDOUT_FILENO)
+        close(node->outpipe[WRITE]);
+}
+
 pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
@@ -147,44 +159,34 @@ pid_t	run_pipeline(t_data *data)
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
-                free_data(&data);
-				exit(1); 
+                wp_free(&argv);
+                exit_with_status(data, 1);
 			}
 			redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
-                free_data(&data);
-				exit(0);
+                exit_with_status(data, 0);
 			}
 			path = make_path(cmd);
 			if (!path)
 			{
-                write(2,"test",4);
-				wp_free(&argv);
 				ft_putendl_fd(": command not found", STDERR_FILENO);
-                free_data(&data);
-                write(2,"test2",5);
-				exit(127);
+                wp_free(&argv);
+                exit_with_status(data, 127);
 			}
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
 			perror("execve");
-            free_data(&data);
-			exit(EXIT_FAILURE);
+            exit_with_status(data, EXIT_FAILURE);
 		}
-		else
-		{
-			if (current_node->inpipe[READ] != STDIN_FILENO)
-			close(current_node->inpipe[READ]);
-			if (current_node->inpipe[WRITE] != STDOUT_FILENO)
-			close(current_node->inpipe[WRITE]);
-		    if (current_node->outpipe[READ] != STDIN_FILENO)
-			close(current_node->outpipe[READ]);
-			if (current_node->outpipe[WRITE] != STDOUT_FILENO)
-			close(current_node->outpipe[WRITE]);
-		}
+        if (current_node->inpipe[0] != STDIN_FILENO)
+			close(current_node->inpipe[0]);
+	    if (current_node->next)
+			close(current_node->outpipe[1]);
+		// close_pipe_fds(current_node);
+        wp_free(&argv);
         current_node = current_node->next;
 	}
 	return (pid);
@@ -202,6 +204,8 @@ int	wait_process(pid_t last_pid)
 		if (child_pid == last_pid)
 			status = WEXITSTATUS(child_status);
 	}
+    if (child_pid == -1 && errno != ECHILD) 
+        perror("wait");
 	return (status);
 }
 

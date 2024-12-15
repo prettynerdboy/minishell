@@ -68,6 +68,11 @@ void free_data(t_data **data)
         free_token_list(&(*data)->tokens);
     if ((*data)->nodes)
         free_node(&(*data)->nodes);
-    // free(*data);
-    // *data = NULL;
+    *data = NULL;
+}
+
+void exit_with_status(t_data *data, int status)
+{
+    free_data(&data);
+    exit(status);
 }

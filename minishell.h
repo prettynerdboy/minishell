@@ -130,10 +130,12 @@ void						error_exit(char *msg);
 void						free_token_list(t_token **head);
 void						free_node(t_node **node);
 void						free_data(t_data **data);
+void 						exit_with_status(t_data *data, int status);
 
 // status
 int							*get_status(void);
 t_data						*get_data(void);
+
 
 // builtin
 int							execute_builtin(char **args);
