@@ -98,6 +98,17 @@ static char	**token_to_argv(t_token *tok)
 	return (argv);
 }
 
+int	check_builtin(char *cmd)
+{
+	if (ft_strcmp(cmd, "echo") == 0)
+		return (1);
+	if (ft_strcmp(cmd, "cd") == 0)
+		return (1);
+	if (ft_strcmp(cmd, "pwd") == 0)
+		return (1);
+	return (0);
+}
+
 pid_t	run_pipeline(t_node *node)
 {
 	t_node		*current_node;
@@ -114,6 +125,17 @@ pid_t	run_pipeline(t_node *node)
 	{
 		if (current_node && current_node->next)
 			init_pipe(current_node);
+		argv = token_to_argv(current_node->command->args);
+		cmd = argv[0];
+		if (!current_node->next)
+		{
+			*get_status() = execute_builtin(argv);
+			if (!*get_status())
+			{
+				wp_free(&argv);
+				return (0);
+			}
+		}
 		pid = fork();
 		if (pid < 0)
 		{
@@ -123,13 +145,11 @@ pid_t	run_pipeline(t_node *node)
 		{
 			connect_pipe(current_node);
 			redirect(current_node->command->redirects);
-			argv = token_to_argv(current_node->command->args);
-			cmd = argv[0];
-			if (!cmd)
-            {
-                wp_free(&argv);
-                exit(0);
-            }
+			if (!cmd || check_builtin(cmd))
+			{
+				wp_free(&argv);
+				exit(0);
+			}
 			path = make_path(cmd);
 			if (!path)
 			{
