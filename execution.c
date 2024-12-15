@@ -120,8 +120,12 @@ pid_t	run_pipeline(t_node *node)
 			perror("fork");
 		}
 		else if (pid == 0)
-		{
+		{//小プロのエラー時に、エラー起きたらノードとか全部フリー
 			connect_pipe(current_node);
+			if (redirect(current_node->command->redirects) != 0)
+			{
+				exit(1); 
+			}
 			redirect(current_node->command->redirects);
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];

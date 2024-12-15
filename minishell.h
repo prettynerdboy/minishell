@@ -116,7 +116,7 @@ t_node						*parser(t_token *tok);
 // redirect
 int							open_redir_file(t_node *node);
 int							handle_redirection(t_node *node);
-void						redirect(t_node *redir);
+int							redirect(t_node *redir);
 int							handle_heredoc(t_node *redirect_node);
 
 // exev

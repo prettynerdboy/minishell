@@ -83,16 +83,21 @@ int	is_redirect(t_node *node)
 	return (0);
 }
 
-void	redirect(t_node *redirect_node)
+int redirect(t_node *redirect_node)
 {
-	if (redirect_node == NULL)
-		return ;
-	if (is_redirect(redirect_node))
-	{
-		dup2(redirect_node->redirect_fd, redirect_node->default_fd);
+    if (redirect_node == NULL)
+        return (0);
+    if (is_redirect(redirect_node))
+    {
+        if (redirect_node->redirect_fd < 0)
+            return (1);
+        dup2(redirect_node->redirect_fd, redirect_node->default_fd);
         close(redirect_node->redirect_fd);
-	}
-	else
-		perror("faile,redirect");
-	redirect(redirect_node->next);
+    }
+    else
+    {
+        perror("failed redirect");
+        return (1);
+    }
+    return (redirect(redirect_node->next));
 }
