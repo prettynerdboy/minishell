@@ -162,7 +162,6 @@ pid_t	run_pipeline(t_data *data)
                 wp_free(&argv);
                 exit_with_status(data, 1);
 			}
-			redirect(current_node->command->redirects);
 			close_redirect_fds(current_node);
 			if (!cmd || check_builtin(cmd))
 			{
@@ -186,10 +185,10 @@ pid_t	run_pipeline(t_data *data)
 			close(current_node->inpipe[0]);
 	    if (current_node->next)
 			close(current_node->outpipe[1]);
-		// close_pipe_fds(current_node);
         wp_free(&argv);
         current_node = current_node->next;
 	}
+	close_redirect_fds(current_node);
 	return (pid);
 }
 

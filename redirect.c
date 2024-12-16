@@ -115,7 +115,7 @@ void close_redirect_fds(t_node *node)
         {
             close_redirect_fds(node->redirects);
         }
-        else if (node->redirect_fd > 2)  // 標準入出力以外のfdをクローズ
+        else if (node->redirect_fd > 2)
         {
             close(node->redirect_fd);
             node->redirect_fd = -1;
