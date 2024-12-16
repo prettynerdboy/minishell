@@ -101,3 +101,25 @@ int redirect(t_node *redirect_node)
     }
     return (redirect(redirect_node->next));
 }
+
+void close_redirect_fds(t_node *node)
+{
+    while (node)
+    {
+        if (node->kind == ND_PIPELINE)
+        {
+            close_redirect_fds(node->command);
+            close_redirect_fds(node->next);
+        }
+        else if (node->kind == ND_SIMPLE_CMD)
+        {
+            close_redirect_fds(node->redirects);
+        }
+        else if (node->redirect_fd > 2)  // 標準入出力以外のfdをクローズ
+        {
+            close(node->redirect_fd);
+            node->redirect_fd = -1;
+        }
+        node = node->next;
+    }
+}

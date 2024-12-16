@@ -163,6 +163,7 @@ pid_t	run_pipeline(t_data *data)
                 exit_with_status(data, 1);
 			}
 			redirect(current_node->command->redirects);
+			close_redirect_fds(current_node);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
