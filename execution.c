@@ -25,6 +25,15 @@ static char	*find_path(char **path_arr, const char *cmd)
 	return (NULL);
 }
 
+static char	*check_absolute_path(const char *cmd)
+{
+	if (!cmd)
+		return (NULL);
+	if (access(cmd, F_OK) == 0)
+		return (ft_strdup(cmd));
+	return (NULL);
+}
+
 static char	*make_path(const char *cmd)
 {
 	char	**path_arr;
@@ -34,7 +43,7 @@ static char	*make_path(const char *cmd)
 	if (!cmd)
 		return (NULL);
 	if (cmd[0] == '/')
-		return (ft_strdup(cmd));
+		return (check_absolute_path(cmd));
 	path_env = getenv("PATH");
 	if (!path_env)
 		return (NULL);
@@ -158,9 +167,13 @@ pid_t	run_pipeline(t_data *data)
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];
 			connect_pipe(current_node);
+			if (open_redir_file(current_node->command) != 0)
+			{
+				wp_free(&argv);
+				exit_with_status(data, 1);
+			}
 			if (redirect(current_node->command->redirects) != 0)
 			{
-				perror(current_node->command->redirects->filename->word);
 				wp_free(&argv);
 				exit_with_status(data, 1);
 			}
@@ -177,7 +190,6 @@ pid_t	run_pipeline(t_data *data)
 				wp_free(&argv);
 				exit_with_status(data, 127);
 			}
-			dprintf(2,"test\n");
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
@@ -188,6 +200,8 @@ pid_t	run_pipeline(t_data *data)
 			close(current_node->inpipe[0]);
 		if (current_node->next)
 			close(current_node->outpipe[1]);
+		// close_pipe_fds(current_node);
+		// wp_free(&argv);
 		if (pid > 0)
 			close_redirect_fds(current_node->command);
 		current_node = current_node->next;
