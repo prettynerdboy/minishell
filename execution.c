@@ -160,11 +160,11 @@ pid_t	run_pipeline(t_data *data)
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
+				perror(current_node->command->redirects->filename->word);
 				wp_free(&argv);
 				exit_with_status(data, 1);
 			}
 			close_redirect_fds(current_node);
-			// redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
@@ -177,6 +177,7 @@ pid_t	run_pipeline(t_data *data)
 				wp_free(&argv);
 				exit_with_status(data, 127);
 			}
+			dprintf(2,"test\n");
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
@@ -187,8 +188,6 @@ pid_t	run_pipeline(t_data *data)
 			close(current_node->inpipe[0]);
 		if (current_node->next)
 			close(current_node->outpipe[1]);
-		// close_pipe_fds(current_node);
-		// wp_free(&argv);
 		if (pid > 0)
 			close_redirect_fds(current_node->command);
 		current_node = current_node->next;

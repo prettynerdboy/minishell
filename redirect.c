@@ -44,26 +44,26 @@ int handle_redirection(t_node *redirect_node)
 
 int open_redir_file(t_node *node)
 {
-    while (node)
-    {
-        if (node->kind == ND_PIPELINE)
-        {
-            if (open_redir_file(node->command) < 0 )
-                return -1;
+	while (node)
+	{
+		if (node->kind == ND_PIPELINE)
+		{
+			if (open_redir_file(node->command) < 0 )
+				return -1;
         } 
         else if (node->kind == ND_SIMPLE_CMD)
         {
             if (open_redir_file(node->redirects) < 0)
                 return -1;
         } 
-        else
+		else
         {
             node->redirect_fd = handle_redirection(node);
-            if (node->redirect_fd < 0)
-            {
-                perror(node->filename->word);
-                return -1;
-            }
+            // dprintf(2,"node->redirect_fd=%d",node->redirect_fd);
+            // if (node->redirect_fd < 0)
+            // {
+            //     perror(node->filename->word);
+            // }
         }
         node = node->next;
     }
