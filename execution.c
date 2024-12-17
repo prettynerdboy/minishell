@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <dirent.h>
 
-static char	*find_path(char **path_arr, const char *cmd)
+static char	*find_cmd_path(char **path_arr, const char *cmd)
 {
 	char	*part_path;
 	char	*full_path;
@@ -27,7 +27,7 @@ static char	*find_path(char **path_arr, const char *cmd)
 	return (NULL);
 }
 
-static char	*check_absolute_path(const char *cmd)
+static char	*check_path(const char *cmd)
 {
 	DIR * dirp;
 	if (!cmd)
@@ -54,15 +54,15 @@ static char	*make_path(const char *cmd)
 
 	if (!cmd)
 		return (NULL);
-	if (cmd[0] == '/')
-		return (check_absolute_path(cmd));
+	if (cmd[0] == '/' || cmd[0] == '.')
+		return (check_path(cmd));
 	path_env = getenv("PATH");
 	if (!path_env)
 		return (NULL);
 	path_arr = ft_split(path_env, ':');
 	if (!path_arr)
 		return (NULL);
-	path = find_path(path_arr, cmd);
+	path = find_cmd_path(path_arr, cmd);
 	wp_free(&path_arr);
 	return (path);
 }
@@ -182,7 +182,7 @@ pid_t	run_pipeline(t_data *data)
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
-				exit_with_status(data, 0);
+				exit_with_status(data, 0);//これのexitstatusあってる？
 			}
 			path = make_path(cmd);
 			if (!path)
