@@ -130,7 +130,7 @@ pid_t	run_pipeline(t_data *data)
 	char		**argv;
 	int			status;
 
-    if (data == NULL || data->nodes == NULL)
+	if (data == NULL || data->nodes == NULL)
 		return (-1);
 	current_node = data->nodes;
 	while (current_node != NULL)
@@ -160,40 +160,38 @@ pid_t	run_pipeline(t_data *data)
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
-                wp_free(&argv);
-                exit_with_status(data, 1);
+				wp_free(&argv);
+				exit_with_status(data, 1);
 			}
-			
-			
 			close_redirect_fds(current_node);
 			// redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
-                exit_with_status(data, 0);
+				exit_with_status(data, 0);
 			}
 			path = make_path(cmd);
 			if (!path)
 			{
 				ft_putendl_fd(": command not found", STDERR_FILENO);
-                wp_free(&argv);
-                exit_with_status(data, 127);
+				wp_free(&argv);
+				exit_with_status(data, 127);
 			}
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
 			perror("execve");
-            exit_with_status(data, EXIT_FAILURE);
+			exit_with_status(data, EXIT_FAILURE);
 		}
-        if (current_node->inpipe[0] != STDIN_FILENO)
+		if (current_node->inpipe[0] != STDIN_FILENO)
 			close(current_node->inpipe[0]);
-	    if (current_node->next)
+		if (current_node->next)
 			close(current_node->outpipe[1]);
 		// close_pipe_fds(current_node);
-        // wp_free(&argv);
-        if(pid>0)
-            close_redirect_fds(current_node->command);
-        current_node = current_node->next;
+		// wp_free(&argv);
+		if (pid > 0)
+			close_redirect_fds(current_node->command);
+		current_node = current_node->next;
 	}
 	return (pid);
 }
@@ -210,8 +208,8 @@ int	wait_process(pid_t last_pid)
 		if (child_pid == last_pid)
 			status = WEXITSTATUS(child_status);
 	}
-    if (child_pid == -1 && errno != ECHILD) 
-        perror("wait");
+	if (child_pid == -1 && errno != ECHILD)
+		perror("wait");
 	return (status);
 }
 
