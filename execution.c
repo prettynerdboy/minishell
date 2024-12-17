@@ -108,18 +108,6 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
-// static void close_pipe_fds(t_node *node)
-// {
-//     if (node->inpipe[READ] != STDIN_FILENO)
-//         close(node->inpipe[READ]);
-//     if (node->inpipe[WRITE] != STDOUT_FILENO)
-//         close(node->inpipe[WRITE]);
-//     if (node->outpipe[READ] != STDIN_FILENO)
-//         close(node->outpipe[READ]);
-//     if (node->outpipe[WRITE] != STDOUT_FILENO)
-//         close(node->outpipe[WRITE]);
-// }
-
 pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
@@ -139,9 +127,8 @@ pid_t	run_pipeline(t_data *data)
 			init_pipe(current_node);
 		if (!current_node->next)
 		{
-			// ビルトインコマンドの実行
 			status = execute_builtin(current_node->command);
-			if (status != -1) // ビルトインコマンドが実行された場合
+			if (status != -1)
 			{
 				*get_status() = status;
 				return (0);
@@ -154,17 +141,21 @@ pid_t	run_pipeline(t_data *data)
 			return (-1);
 		}
 		else if (pid == 0)
-		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
+		{
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];
 			connect_pipe(current_node);
+			if (open_redir_file(current_node->command) != 0)
+			{
+				wp_free(&argv);
+				exit_with_status(data, 1);
+			}
 			if (redirect(current_node->command->redirects) != 0)
 			{
 				wp_free(&argv);
 				exit_with_status(data, 1);
 			}
-			close_redirect_fds(current_node);
-			// redirect(current_node->command->redirects);
+			close_redirect_fds(current_node->command);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
@@ -178,7 +169,6 @@ pid_t	run_pipeline(t_data *data)
 				exit_with_status(data, 127);
 			}
 			execve(path, argv, environ);
-			free(path);
 			wp_free(&argv);
 			perror("execve");
 			exit_with_status(data, EXIT_FAILURE);
@@ -187,10 +177,6 @@ pid_t	run_pipeline(t_data *data)
 			close(current_node->inpipe[0]);
 		if (current_node->next)
 			close(current_node->outpipe[1]);
-		// close_pipe_fds(current_node);
-		// wp_free(&argv);
-		if (pid > 0)
-			close_redirect_fds(current_node->command);
 		current_node = current_node->next;
 	}
 	return (pid);

@@ -44,28 +44,22 @@ int handle_redirection(t_node *redirect_node)
 
 int open_redir_file(t_node *node)
 {
-    while (node)
+    if (!node)
+        return 0;
+    
+    if (node->kind == ND_SIMPLE_CMD)
     {
-        if (node->kind == ND_PIPELINE)
+        t_node *redirect = node->redirects;
+        while (redirect)
         {
-            if (open_redir_file(node->command) < 0 )
-                return -1;
-        } 
-        else if (node->kind == ND_SIMPLE_CMD)
-        {
-            if (open_redir_file(node->redirects) < 0)
-                return -1;
-        } 
-        else
-        {
-            node->redirect_fd = handle_redirection(node);
-            if (node->redirect_fd < 0)
+            redirect->redirect_fd = handle_redirection(redirect);
+            if (redirect->redirect_fd < 0)
             {
-                perror(node->filename->word);
+                perror(redirect->filename->word);
                 return -1;
             }
+            redirect = redirect->next;
         }
-        node = node->next;
     }
     return 0;
 }
@@ -104,22 +98,20 @@ int redirect(t_node *redirect_node)
 
 void close_redirect_fds(t_node *node)
 {
-    while (node)
+    if (!node)
+        return;
+
+    if (node->kind == ND_SIMPLE_CMD)
     {
-        if (node->kind == ND_PIPELINE)
+        t_node *redirect = node->redirects;
+        while (redirect)
         {
-            close_redirect_fds(node->command);
-            close_redirect_fds(node->next);
+            if (redirect->redirect_fd > 2)
+            {
+                close(redirect->redirect_fd);
+                redirect->redirect_fd = -1;
+            }
+            redirect = redirect->next;
         }
-        else if (node->kind == ND_SIMPLE_CMD)
-        {
-            close_redirect_fds(node->redirects);
-        }
-        else if (node->redirect_fd > 2)
-        {
-            close(node->redirect_fd);
-            node->redirect_fd = -1;
-        }
-        node = node->next;
     }
 }
