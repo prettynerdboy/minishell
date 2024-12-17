@@ -48,7 +48,7 @@ int open_redir_file(t_node *node)
     {
         if (node->kind == ND_PIPELINE)
         {
-            if (open_redir_file(node->command) < 0 || open_redir_file(node->next) < 0)
+            if (open_redir_file(node->command) < 0 )
                 return -1;
         } 
         else if (node->kind == ND_SIMPLE_CMD)
@@ -115,7 +115,7 @@ void close_redirect_fds(t_node *node)
         {
             close_redirect_fds(node->redirects);
         }
-        else if (node->redirect_fd > 2)  // 標準入出力以外のfdをクローズ
+        else if (node->redirect_fd > 2)
         {
             close(node->redirect_fd);
             node->redirect_fd = -1;
