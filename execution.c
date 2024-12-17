@@ -1,5 +1,6 @@
 #include "minishell.h"
 #include <errno.h>
+#include <dirent.h>
 
 static char	*find_path(char **path_arr, const char *cmd)
 {
@@ -22,15 +23,26 @@ static char	*find_path(char **path_arr, const char *cmd)
 		free(full_path);
 		i++;
 	}
+	dprintf(2, "%s command not found\n", cmd);
 	return (NULL);
 }
 
 static char	*check_absolute_path(const char *cmd)
 {
+	DIR * dirp;
 	if (!cmd)
 		return (NULL);
+	dirp =opendir(cmd);
+	if (dirp)
+	{
+		dprintf(2, "%s : Is a directory\n", cmd);
+		closedir(dirp);
+		return(NULL);
+	}
+	closedir(dirp);
 	if (access(cmd, F_OK) == 0)
 		return (ft_strdup(cmd));
+	dprintf(2, "%s : No such file or directory\n", cmd);
 	return (NULL);
 }
 
@@ -117,17 +129,6 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
-// static void close_pipe_fds(t_node *node)
-// {
-//     if (node->inpipe[READ] != STDIN_FILENO)
-//         close(node->inpipe[READ]);
-//     if (node->inpipe[WRITE] != STDOUT_FILENO)
-//         close(node->inpipe[WRITE]);
-//     if (node->outpipe[READ] != STDIN_FILENO)
-//         close(node->outpipe[READ]);
-//     if (node->outpipe[WRITE] != STDOUT_FILENO)
-//         close(node->outpipe[WRITE]);
-// }
 
 pid_t	run_pipeline(t_data *data)
 {
@@ -186,7 +187,6 @@ pid_t	run_pipeline(t_data *data)
 			path = make_path(cmd);
 			if (!path)
 			{
-				ft_putendl_fd(": command not found", STDERR_FILENO);
 				wp_free(&argv);
 				exit_with_status(data, 127);
 			}
