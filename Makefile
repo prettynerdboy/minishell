@@ -6,7 +6,7 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/16 02:17:30 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/18 02:56:23 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,11 @@ LIB_NAME	= $(LIB_DIR)/libft.a
 SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c free.c redirect.c error.c status.c builtin.c
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
-LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -lreadline
+LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -lreadline -g
 
 # TODO CFLAGS 後で追加
 # CFLAGS  = -Wall -Wextra -Werror
-DEBUG_FLAGS = -g
+DEBUG_FLAGS = -fsanitize=address
 
 all: $(LIB_NAME) $(NAME)
 

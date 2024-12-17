@@ -19,25 +19,28 @@ void free_token_list(t_token **head)
     *head = NULL; 
 }
 
-void free_node(t_node *node)
+void free_node(t_node **node)
 {
-    if (!node)
+    if (!node || !*node)
         return;
-    free_token_list(&node->args);
-    if (node->filename)
+    free_token_list(&(*node)->args);
+    if ((*node)->filename)
     {
-        free(node->filename->word);
-        free(node->filename);
+        free((*node)->filename->word);
+        free((*node)->filename);
+        (*node)->filename = NULL;
     }
-    if (node->delimiter)
+    if ((*node)->delimiter)
     {
-        free(node->delimiter->word);
-        free(node->delimiter);
+        free((*node)->delimiter->word);
+        free((*node)->delimiter);
+        (*node)->delimiter = NULL;
     }
-    free_node(node->redirects);
-    free_node(node->command);
-    free_node(node->next);
-    free(node);
+    free_node(&(*node)->redirects);
+    free_node(&(*node)->command);
+    free_node(&(*node)->next);
+    free(*node);
+    *node = NULL;
 } 
 
 void wp_free(char ***str)
@@ -55,4 +58,21 @@ void wp_free(char ***str)
     }
     free(*str);
     *str = NULL;
+}
+
+void free_data(t_data **data)
+{
+    if (!data || !*data)
+        return;
+    if ((*data)->tokens)
+        free_token_list(&(*data)->tokens);
+    if ((*data)->nodes)
+        free_node(&(*data)->nodes);
+    *data = NULL;
+}
+
+void exit_with_status(t_data *data, int status)
+{
+    free_data(&data);
+    exit(status);
 }

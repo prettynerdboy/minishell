@@ -106,11 +106,8 @@ void	shell(char *line, int *status)
 	// printf("=== Syntax Tree ===\n");
 	// print_tree(nodes, 0);
 	open_redir_file(data->nodes);//戻り値（エラーチェック追加）
-	*status = execution(data->nodes);
-	free_token_list(&data->tokens);
-	data->tokens = NULL;
-	free_node(data->nodes);
-	data->nodes = NULL;
+	*status = execution(data);
+	free_data(&data);
 	// printf("===================\n");
 	// *status = execution(nodes);
 	// status = NULL;
@@ -150,7 +147,7 @@ static void	signal_handler(int sig, siginfo_t *info, void *context)
 		}
 		if (data->nodes != NULL)
 		{
-			free_node(data->nodes);
+			free_node(&data->nodes);
 			data->nodes = NULL;
 		}
 	}

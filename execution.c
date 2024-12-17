@@ -108,7 +108,19 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
-pid_t	run_pipeline(t_node *node)
+// static void close_pipe_fds(t_node *node)
+// {
+//     if (node->inpipe[READ] != STDIN_FILENO)
+//         close(node->inpipe[READ]);
+//     if (node->inpipe[WRITE] != STDOUT_FILENO)
+//         close(node->inpipe[WRITE]);
+//     if (node->outpipe[READ] != STDIN_FILENO)
+//         close(node->outpipe[READ]);
+//     if (node->outpipe[WRITE] != STDOUT_FILENO)
+//         close(node->outpipe[WRITE]);
+// }
+
+pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
 	extern char	**environ;
@@ -118,9 +130,9 @@ pid_t	run_pipeline(t_node *node)
 	char		**argv;
 	int			status;
 
-	if (node == NULL)
+	if (data == NULL || data->nodes == NULL)
 		return (-1);
-	current_node = node;
+	current_node = data->nodes;
 	while (current_node != NULL)
 	{
 		if (current_node && current_node->next)
@@ -137,43 +149,48 @@ pid_t	run_pipeline(t_node *node)
 		}
 		pid = fork();
 		if (pid < 0)
+		{
 			perror("fork");
+			return (-1);
+		}
 		else if (pid == 0)
 		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
+			argv = token_to_argv(current_node->command->args);
+			cmd = argv[0];
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
-				exit(1);
+				wp_free(&argv);
+				exit_with_status(data, 1);
 			}
+			close_redirect_fds(current_node);
 			// redirect(current_node->command->redirects);
-			argv = token_to_argv(current_node->command->args);
-			cmd = argv[0];
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
-				exit(0);
+				exit_with_status(data, 0);
 			}
 			path = make_path(cmd);
 			if (!path)
 			{
+				ft_putendl_fd(": command not found", STDERR_FILENO);
 				wp_free(&argv);
-				perror("command not found");
-				exit(127);
+				exit_with_status(data, 127);
 			}
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
 			perror("execve");
-			exit(EXIT_FAILURE);
+			exit_with_status(data, EXIT_FAILURE);
 		}
-		if (current_node->inpipe[READ] != STDIN_FILENO)
-			close(current_node->inpipe[READ]);
-		if (current_node->inpipe[WRITE] != STDOUT_FILENO)
-			close(current_node->inpipe[WRITE]);
-		if (current_node->outpipe[READ] != STDIN_FILENO)
-			close(current_node->outpipe[READ]);
-		if (current_node->outpipe[WRITE] != STDOUT_FILENO)
-			close(current_node->outpipe[WRITE]);
+		if (current_node->inpipe[0] != STDIN_FILENO)
+			close(current_node->inpipe[0]);
+		if (current_node->next)
+			close(current_node->outpipe[1]);
+		// close_pipe_fds(current_node);
+		// wp_free(&argv);
+		if (pid > 0)
+			close_redirect_fds(current_node->command);
 		current_node = current_node->next;
 	}
 	return (pid);
@@ -196,12 +213,12 @@ int	wait_process(pid_t last_pid)
 	return (status);
 }
 
-int	execution(t_node *node)
+int	execution(t_data *data)
 {
 	int		status;
 	pid_t	pid;
 
-	pid = run_pipeline(node);
+	pid = run_pipeline(data);
 	status = wait_process(pid);
 	return (status);
 }

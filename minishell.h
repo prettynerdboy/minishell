@@ -3,11 +3,11 @@
 # include "libft/libft.h"
 # include <errno.h>
 # include <fcntl.h>
+# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
 # include <unistd.h>
@@ -117,23 +117,27 @@ t_node						*parser(t_token *tok);
 int							open_redir_file(t_node *node);
 int							handle_redirection(t_node *node);
 int							redirect(t_node *redir);
+void						close_redirect_fds(t_node *node);
 int							handle_heredoc(t_node *redirect_node);
 
 // exev
+int							execution(t_data *data);
+pid_t						run_pipeline(t_data *data);
 char						**token_to_argv(t_token *tok);
-int							execution(t_node *node);
-pid_t						run_pipeline(t_node *node);
 int							wait_process(pid_t last_pid);
 
 // free
 void						wp_free(char ***str);
 void						error_exit(char *msg);
 void						free_token_list(t_token **head);
-void						free_node(t_node *node);
+void						free_node(t_node **node);
+void						free_data(t_data **data);
+void 						exit_with_status(t_data *data, int status);
 
 // status
 int							*get_status(void);
 t_data						*get_data(void);
+
 
 // builtin
 int							execute_builtin(t_node *cmd_node);

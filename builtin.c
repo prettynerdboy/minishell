@@ -155,10 +155,10 @@ int	ft_exit(char **argv)
 	data = get_data();
 	if (!argv[1])
 	{
-		free_token_list(&data->tokens);
-		free_node(data->nodes);
+		// free_token_list(&data->tokens);
+		// free_node(data->nodes);
 		printf("exit\n");
-		exit(0);
+		exit_with_status(data, 0);
 	}
 	status = ft_atoi(argv[1]);
 	if (argv[2])
@@ -166,10 +166,9 @@ int	ft_exit(char **argv)
 		ft_putstr_fd("exit: too many arguments\n", STDERR_FILENO);
 		return (1);
 	}
-	free_token_list(&data->tokens);
-	free_node(data->nodes);
+
 	printf("exit\n");
-	exit(status);
+	exit_with_status(data, status);
 }
 // リダイレクトなしの場合の実行関数
 static int	execute_builtin_simple(char **argv)
