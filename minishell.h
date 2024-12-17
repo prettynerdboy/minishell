@@ -123,6 +123,7 @@ int							handle_heredoc(t_node *redirect_node);
 // exev
 int							execution(t_data *data);
 pid_t						run_pipeline(t_data *data);
+char						**token_to_argv(t_token *tok);
 int							wait_process(pid_t last_pid);
 
 // free
@@ -139,6 +140,6 @@ t_data						*get_data(void);
 
 
 // builtin
-int							execute_builtin(char **args);
+int							execute_builtin(t_node *cmd_node);
 
 #endif

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
+#    By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/15 23:45:32 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/17 21:44:26 by soaoki           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,11 @@ LIB_NAME	= $(LIB_DIR)/libft.a
 SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c free.c redirect.c error.c status.c builtin.c
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
-LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -lreadline
+LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -lreadline -g
 
 # TODO CFLAGS 後で追加
 # CFLAGS  = -Wall -Wextra -Werror
-DEBUG_FLAGS = -g
+DEBUG_FLAGS = -fsanitize=address
 
 all: $(LIB_NAME) $(NAME)
 
@@ -34,6 +34,7 @@ $(NAME): $(OBJS)
 clean:
 	rm -f $(OBJS)
 	$(MAKE) -C $(LIB_DIR) clean
+
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIB_DIR) fclean

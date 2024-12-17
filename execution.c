@@ -72,7 +72,7 @@ static void	connect_pipe(t_node *node)
 		close(node->outpipe[READ]);
 }
 
-static char	**token_to_argv(t_token *tok)
+char	**token_to_argv(t_token *tok)
 {
 	int		list_len;
 	char	**argv;
@@ -100,11 +100,10 @@ static char	**token_to_argv(t_token *tok)
 
 int	check_builtin(char *cmd)
 {
-	if (ft_strcmp(cmd, "echo") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "cd") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "pwd") == 0)
+	if (ft_strcmp(cmd, "echo") == 0 || ft_strcmp(cmd, "cd") == 0
+		|| ft_strcmp(cmd, "pwd") == 0 || ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "env") == 0
+		|| ft_strcmp(cmd, "exit") == 0)
 		return (1);
 	return (0);
 }
@@ -129,6 +128,7 @@ pid_t	run_pipeline(t_data *data)
 	char		*path;
 	pid_t		pid;
 	char		**argv;
+	int			status;
 
     if (data == NULL || data->nodes == NULL)
 		return (-1);
@@ -137,14 +137,13 @@ pid_t	run_pipeline(t_data *data)
 	{
 		if (current_node && current_node->next)
 			init_pipe(current_node);
-		argv = token_to_argv(current_node->command->args);
-		cmd = argv[0];
 		if (!current_node->next)
 		{
-			*get_status() = execute_builtin(argv);
-			if (!*get_status())
+			// ビルトインコマンドの実行
+			status = execute_builtin(current_node->command);
+			if (status != -1) // ビルトインコマンドが実行された場合
 			{
-				wp_free(&argv);
+				*get_status() = status;
 				return (0);
 			}
 		}
@@ -155,14 +154,19 @@ pid_t	run_pipeline(t_data *data)
 			return (-1);
 		}
 		else if (pid == 0)
-		{//小プロのエラー時に、エラー起きたらノードとか全部フリー
+		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
+			argv = token_to_argv(current_node->command->args);
+			cmd = argv[0];
 			connect_pipe(current_node);
 			if (redirect(current_node->command->redirects) != 0)
 			{
                 wp_free(&argv);
                 exit_with_status(data, 1);
 			}
+			
+			
 			close_redirect_fds(current_node);
+			// redirect(current_node->command->redirects);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
@@ -186,7 +190,7 @@ pid_t	run_pipeline(t_data *data)
 	    if (current_node->next)
 			close(current_node->outpipe[1]);
 		// close_pipe_fds(current_node);
-        wp_free(&argv);
+        // wp_free(&argv);
         if(pid>0)
             close_redirect_fds(current_node->command);
         current_node = current_node->next;
