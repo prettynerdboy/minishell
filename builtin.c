@@ -3,6 +3,34 @@
 // builtin.h
 typedef int			(*t_builtin_func)(char **argv);
 
+// リダイレクト処理を行う共通関数
+static int	handle_builtin_redirect(t_node *cmd_node,
+		int (*builtin_func)(char **))
+{
+	int	original_stdout;
+	int	original_stdin;
+	int	status;
+
+	// 標準入出力をバックアップ
+	original_stdout = dup(STDOUT_FILENO);
+	original_stdin = dup(STDIN_FILENO);
+	// リダイレクトの設定
+	if (cmd_node->redirects && redirect(cmd_node->redirects) != 0)
+	{
+		close(original_stdout);
+		close(original_stdin);
+		return (1);
+	}
+	// ビルトインコマンドの実行
+	status = builtin_func(cmd_node->args->word);
+	// 標準入出力を元に戻す
+	dup2(original_stdout, STDOUT_FILENO);
+	dup2(original_stdin, STDIN_FILENO);
+	close(original_stdout);
+	close(original_stdin);
+	return (status);
+}
+
 typedef struct s_builtin
 {
 	char			*name;
@@ -172,22 +200,30 @@ int	ft_exit(char **argv)
 	exit(status);
 }
 
-// ビルトインコマンドの実行関数
-int	execute_builtin(char **argv)
+// execute_builtinの修正
+int	execute_builtin(t_node *cmd_node)
 {
+	char **argv = token_to_argv(cmd_node->args);
+	int status = -1;
+
+	if (!argv || !argv[0])
+		return (-1);
+
 	if (ft_strcmp(argv[0], "echo") == 0)
-		return (ft_echo(argv));
-	if (ft_strcmp(argv[0], "cd") == 0)
-		return (ft_cd(argv));
-	if (ft_strcmp(argv[0], "pwd") == 0)
-		return (ft_pwd(argv));
-	if (ft_strcmp(argv[0], "export") == 0)
-		return (ft_export(argv));
-	if (ft_strcmp(argv[0], "unset") == 0)
-		return (ft_unset(argv));
-	if (ft_strcmp(argv[0], "env") == 0)
-		return (ft_env(argv));
-	if (ft_strcmp(argv[0], "exit") == 0)
-		return (ft_exit(argv));
-	return (-1); // ビルトインコマンドが見つからない場合
+		status = handle_builtin_redirect(cmd_node, ft_echo);
+	else if (ft_strcmp(argv[0], "cd") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_cd);
+	else if (ft_strcmp(argv[0], "pwd") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_pwd);
+	else if (ft_strcmp(argv[0], "export") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_export);
+	else if (ft_strcmp(argv[0], "unset") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_unset);
+	else if (ft_strcmp(argv[0], "env") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_env);
+	else if (ft_strcmp(argv[0], "exit") == 0)
+		status = handle_builtin_redirect(cmd_node, ft_exit);
+
+	wp_free(&argv);
+	return (status);
 }

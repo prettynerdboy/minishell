@@ -72,7 +72,7 @@ static void	connect_pipe(t_node *node)
 		close(node->outpipe[READ]);
 }
 
-static char	**token_to_argv(t_token *tok)
+char	**token_to_argv(t_token *tok)
 {
 	int		list_len;
 	char	**argv;
@@ -116,6 +116,7 @@ pid_t	run_pipeline(t_node *node)
 	char		*path;
 	pid_t		pid;
 	char		**argv;
+	int			status;
 
 	if (node == NULL)
 		return (-1);
@@ -124,14 +125,13 @@ pid_t	run_pipeline(t_node *node)
 	{
 		if (current_node && current_node->next)
 			init_pipe(current_node);
-		argv = token_to_argv(current_node->command->args);
-		cmd = argv[0];
 		if (!current_node->next)
 		{
-			*get_status() = execute_builtin(argv);
-			if (!*get_status())
+			// ビルトインコマンドの実行
+			status = execute_builtin(current_node->command);
+			if (status != -1) // ビルトインコマンドが実行された場合
 			{
-				wp_free(&argv);
+				*get_status() = status;
 				return (0);
 			}
 		}
@@ -145,7 +145,9 @@ pid_t	run_pipeline(t_node *node)
 			{
 				exit(1);
 			}
-			redirect(current_node->command->redirects);
+			// redirect(current_node->command->redirects);
+			argv = token_to_argv(current_node->command->args);
+			cmd = argv[0];
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
