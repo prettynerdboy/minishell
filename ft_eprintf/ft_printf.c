@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anakin <anakin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 12:31:49 by anakin            #+#    #+#             */
-/*   Updated: 2024/09/13 13:38:17 by soaoki           ###   ########.fr       */
+/*   Updated: 2024/12/18 23:44:57 by anakin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "ft_eprintf.h"
 
 int	check_id( const char *id, va_list ap)
 {
@@ -33,7 +33,7 @@ int	check_id( const char *id, va_list ap)
 	return (2);
 }
 
-int	ft_printf(const char *format, ...)
+int	ft_eprintf(const char *format, ...)
 {
 	size_t	len;
 	size_t	count;

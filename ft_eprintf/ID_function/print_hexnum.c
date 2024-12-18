@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   print_hexnum.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anakin <anakin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 11:18:00 by anakin            #+#    #+#             */
-/*   Updated: 2024/09/05 12:52:12 by soaoki           ###   ########.fr       */
+/*   Updated: 2024/12/18 22:50:00 by anakin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "ft_eprintf.h"
 
 static	char	change_alpha(unsigned int h)
 {

@@ -1,13 +1,15 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 # include "libft/libft.h"
+# include "./ft_eprintf/ft_eprintf.h"
 # include <errno.h>
 # include <fcntl.h>
+# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
+# include <sys/wait.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
 # include <unistd.h>
@@ -85,6 +87,7 @@ typedef struct s_builtin
 # define SIGINT_STATUS 130
 # define SIGQUIT_STATUS 131
 # define TOKEN_PARSE_ERROR_STATUS 258
+# define MAX_TOKENS 100
 // function
 
 // token_utility

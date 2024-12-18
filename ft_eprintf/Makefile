@@ -3,14 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
+#    By: anakin <anakin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/04 11:37:18 by anakin            #+#    #+#              #
-#    Updated: 2024/12/18 10:36:19 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/18 22:52:30 by anakin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = libftprintf.a
+NAME = libfteprintf.a
 CFLAGS =  -Wall -Wextra -Werror -I. -c
 FILES = ft_printf.c\
 			ID_function/print_char.c\

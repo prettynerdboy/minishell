@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   print_num.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anakin <anakin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 14:32:40 by anakin            #+#    #+#             */
-/*   Updated: 2024/09/05 13:01:10 by soaoki           ###   ########.fr       */
+/*   Updated: 2024/12/18 22:50:52 by anakin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "ft_eprintf.h"
 #include<stdio.h>
 
 static size_t	get_udigits(unsigned int n)
@@ -50,7 +50,7 @@ size_t	print_num(long long i, const char id)
 		str = ft_itoa((int)i);
 	else if (id == 'u')
 		str = unsigned_itoa((unsigned)i);
-	ft_putstr_fd(str, 1);
+	ft_putstr_fd(str, 2);
 	len = ft_strlen(str);
 	free(str);
 	return (len);

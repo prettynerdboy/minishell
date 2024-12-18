@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   print_format.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anakin <anakin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 13:14:54 by anakin            #+#    #+#             */
-/*   Updated: 2024/09/05 12:36:11 by soaoki           ###   ########.fr       */
+/*   Updated: 2024/12/18 22:49:23 by anakin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "ft_eprintf.h"
 
 size_t	print_format(const char *str, char id)
 {
@@ -19,7 +19,7 @@ size_t	print_format(const char *str, char id)
 	byte = 0;
 	while (str[byte] && str[byte] != id)
 	byte ++;
-	write(1, str, byte);
+	write(2, str, byte);
 	return (byte);
 }
 
