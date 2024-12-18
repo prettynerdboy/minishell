@@ -1,6 +1,5 @@
 #include "minishell.h"
 
-
 // __attribute__((destructor)) static void destructor()
 // {
 // 	system("leaks -q my_minishell");
@@ -105,7 +104,8 @@ void	shell(char *line, int *status)
 	}
 	// printf("=== Syntax Tree ===\n");
 	// print_tree(nodes, 0);
-	open_redir_file(data->nodes);//戻り値（エラーチェック追加）
+	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
+	// printf("open_redir_file\n");
 	*status = execution(data);
 	free_data(&data);
 	// printf("===================\n");
@@ -113,61 +113,22 @@ void	shell(char *line, int *status)
 	// status = NULL;
 }
 
-void	reset_prompt(void)
-{
-	int	*status;
 
-	status = get_status();
-	printf("\n");
-	rl_on_new_line();       // 新しい行を作成
-	rl_replace_line("", 0); // 現在の入力行をクリア
-	rl_redisplay();         // プロンプトを再表示
-	*status = SIGINT_STATUS;
-}
-
-static void	signal_handler(int sig, siginfo_t *info, void *context)
-{
-	int		status;
-	t_data	*data;
-
-	data = get_data();
-	(void *)context;
-	if (info->si_pid == 0)
-		return ;
-	if (sig == SIGINT)
-	{
-		status = *get_status();
-		reset_prompt();
-		if (status == 1)
-			return ;
-		if (data->tokens != NULL)
-		{
-			free_token_list(&data->tokens);
-			data->tokens = NULL;
-		}
-		if (data->nodes != NULL)
-		{
-			free_node(&data->nodes);
-			data->nodes = NULL;
-		}
-	}
-}
 
 int	main(void)
 {
-	int *status;
-	int *loading;
-	char *line;
+	int					*status;
+	int					*loading;
+	char				*line;
+	// struct sigaction	sigaction_t;
 
-	struct sigaction sigaction_t;
-
-	sigaction_t.sa_flags = SA_SIGINFO;
-	sigaction_t.sa_sigaction = &signal_handler;
-	sigemptyset(&sigaction_t.sa_mask);
+	// sigaction_t.sa_flags = SA_SIGINFO;
+	// sigaction_t.sa_sigaction = &signal_handler;
+	// sigemptyset(&sigaction_t.sa_mask);
 	signal(SIGQUIT, SIG_IGN);
-	if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
-		perror("sigaction fatal error");
-
+	signal(SIGINT, &signal_handler);
+	// if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
+	// 	perror("sigaction fatal error");
 	status = get_status();
 	while (1)
 	{
