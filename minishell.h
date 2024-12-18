@@ -69,6 +69,7 @@ typedef struct s_data
 {
 	t_token					*tokens;
 	t_node					*nodes;
+	char					**environ;
 }							t_data;
 
 typedef int					(*t_builtin_func)(char **argv);
