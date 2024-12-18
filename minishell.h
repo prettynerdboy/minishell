@@ -7,6 +7,7 @@
 # include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
+# include <sys/wait.h>
 # include <signal.h>
 # include <stdbool.h>
 # include <stdlib.h>
@@ -78,6 +79,7 @@ typedef struct s_data
 # define SIGINT_STATUS 130
 # define SIGQUIT_STATUS 131
 # define TOKEN_PARSE_ERROR_STATUS 258
+# define MAX_TOKENS 100
 // function
 
 // token_utility

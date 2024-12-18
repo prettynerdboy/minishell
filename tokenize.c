@@ -251,7 +251,14 @@ static bool	check_consecutive_redirect_error(t_token *current)
 bool	check_syntax_error(t_token *tokens)
 {
 	t_token	*current;
+	int		token_count;
 
+	token_count = get_token_list_length(tokens);
+	if (token_count > MAX_TOKENS)
+	{
+		ft_eprintf("minishell: too many input\n");
+		return (false);
+	}
 	current = tokens;
 	while (current && current->type != TK_EOF)
 	{
