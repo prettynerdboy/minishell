@@ -1,6 +1,6 @@
 #include "minishell.h"
-#include <errno.h>
 #include <dirent.h>
+#include <errno.h>
 
 static char	*find_path(char **path_arr, const char *cmd)
 {
@@ -29,15 +29,16 @@ static char	*find_path(char **path_arr, const char *cmd)
 
 static char	*check_absolute_path(const char *cmd)
 {
-	DIR * dirp;
+	DIR	*dirp;
+
 	if (!cmd)
 		return (NULL);
-	dirp =opendir(cmd);
+	dirp = opendir(cmd);
 	if (dirp)
 	{
 		dprintf(2, "%s : Is a directory\n", cmd);
 		closedir(dirp);
-		return(NULL);
+		return (NULL);
 	}
 	closedir(dirp);
 	if (access(cmd, F_OK) == 0)
@@ -129,7 +130,6 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
-
 pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
@@ -165,14 +165,10 @@ pid_t	run_pipeline(t_data *data)
 		}
 		else if (pid == 0)
 		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
+			signal(SIGQUIT, SIG_DFL);
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];
 			connect_pipe(current_node);
-			if (open_redir_file(current_node->command) != 0)
-			{
-				wp_free(&argv);
-				exit_with_status(data, 1);
-			}
 			if (redirect(current_node->command->redirects) != 0)
 			{
 				wp_free(&argv);
@@ -216,13 +212,32 @@ int	wait_process(pid_t last_pid)
 	int		child_status;
 
 	status = 0;
+	child_status = 0;
+	signal(SIGINT, SIG_IGN);
 	while ((child_pid = wait(&child_status)) > 0)
 	{
 		if (child_pid == last_pid)
 			status = WEXITSTATUS(child_status);
 	}
 	if (child_pid == -1 && errno != ECHILD)
+	{
 		perror("wait");
+		printf("\n");
+	}
+	if (WTERMSIG(child_status) == SIGQUIT)
+	{
+		printf("core dump\n");
+		status = SIGQUIT_STATUS;
+	}
+	else if (WTERMSIG(child_status) == SIGINT)
+	{
+		printf("\n");
+		status = SIGINT_STATUS;
+	}
+	// dprintf(2, "signal status: %d, child_status: %d, child_pid: %d, coredump status:%d\n",
+	// 	WTERMSIG(child_status), child_status, child_pid, status);
+	// fflush(0);
+	signal(SIGINT, &signal_handler);
 	return (status);
 }
 

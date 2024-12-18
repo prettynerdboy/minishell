@@ -3,11 +3,11 @@
 # include "libft/libft.h"
 # include <errno.h>
 # include <fcntl.h>
-# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
+# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
 # include <unistd.h>
@@ -75,6 +75,7 @@ typedef struct s_data
 # define READ 0
 # define WRITE 1
 # define SIGINT_STATUS 130
+# define SIGQUIT_STATUS 131
 # define TOKEN_PARSE_ERROR_STATUS 258
 // function
 
@@ -113,6 +114,9 @@ t_node						*make_cmd_node(t_token **rest, t_token *tok);
 t_node						*pipeline(t_token **rest, t_token *tok);
 t_node						*parser(t_token *tok);
 
+// signal
+void						signal_handler(int sig);
+
 // redirect
 int							open_redir_file(t_node *node);
 int							handle_redirection(t_node *node);
@@ -132,13 +136,12 @@ void						error_exit(char *msg);
 void						free_token_list(t_token **head);
 void						free_node(t_node **node);
 void						free_data(t_data **data);
-void 						exit_with_status(t_data *data, int status);
+void						exit_with_status(t_data *data, int status);
 
 // status
 int							*get_status(void);
 t_data						*get_data(void);
-
-
+int							*get_heredoc_fd(int fd);
 // builtin
 int							execute_builtin(t_node *cmd_node);
 
