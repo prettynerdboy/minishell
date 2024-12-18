@@ -1,5 +1,7 @@
 .vscode
 *.o
 libft/*.o
+ft_printf/*.o
 my_minishell
 libft/libft.a
+ft_printf/libftprintf.a
