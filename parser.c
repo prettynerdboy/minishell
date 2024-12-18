@@ -8,24 +8,24 @@ int	check_eof(t_token *tok)
 		return (0);
 }
 
-int	token_is(t_token *token, const char *str)
-{
-	size_t	i;
+// int	token_is(t_token *token, const char *str)
+// {
+// 	size_t	i;
 
-	i = 0;
-	if (!token || !token->word || !str)
-		return (-1);
-	while (token->word[i] && str[i])
-	{
-		if (token->word[i] != str[i])
-			return (0);
-		i++;
-	}
-	if (token->word[i] == '\0' && str[i] == '\0')
-		return (1);
-	else
-		return (0);
-}
+// 	i = 0;
+// 	if (!token || !token->word || !str)
+// 		return (-1);
+// 	while (token->word[i] && str[i])
+// 	{
+// 		if (token->word[i] != str[i])
+// 			return (0);
+// 		i++;
+// 	}
+// 	if (token->word[i] == '\0' && str[i] == '\0')
+// 		return (1);
+// 	else
+// 		return (0);
+// }
 
 t_node	*new_node(t_node_kind kind)
 {
