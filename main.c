@@ -102,32 +102,19 @@ void	shell(char *line, int *status)
 		free_token_list(&data->tokens);
 		return ;
 	}
-	// printf("=== Syntax Tree ===\n");
-	// print_tree(nodes, 0);
 	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
 	*status = execution(data);
 	free_data(&data);
-	// printf("===================\n");
-	// *status = execution(nodes);
-	// status = NULL;
 }
-
-
 
 int	main(void)
 {
-	int					*status;
-	int					*loading;
-	char				*line;
-	// struct sigaction	sigaction_t;
+	int		*status;
+	int		*loading;
+	char	*line;
 
-	// sigaction_t.sa_flags = SA_SIGINFO;
-	// sigaction_t.sa_sigaction = &signal_handler;
-	// sigemptyset(&sigaction_t.sa_mask);
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, &signal_handler);
-	// if (sigaction(SIGINT, &sigaction_t, NULL) < 0)
-	// 	perror("sigaction fatal error");
 	status = get_status();
 	while (1)
 	{
@@ -138,7 +125,6 @@ int	main(void)
 			add_history(line);
 		shell(line, status);
 		free(line);
-		// break ;
 	}
 	exit(*status);
 }

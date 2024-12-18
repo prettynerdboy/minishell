@@ -6,7 +6,7 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/18 10:35:46 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/19 03:03:27 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ LIB_DIR		= libft
 PRINTF_DIR	= ft_printf
 LIB_NAME	= $(LIB_DIR)/libft.a
 PRINTF_NAME	= $(PRINTF_DIR)/libftprintf.a
-SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c free.c redirect.c error.c status.c builtin.c
+SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c free.c redirect.c error.c status.c builtin.c export.c
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
 LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -I $(PRINTF_DIR) $(PRINTF_NAME) -lreadline -g

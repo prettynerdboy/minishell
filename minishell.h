@@ -69,6 +69,14 @@ typedef struct s_data
 	t_node					*nodes;
 }							t_data;
 
+typedef int					(*t_builtin_func)(char **argv);
+
+typedef struct s_builtin
+{
+	char					*name;
+	t_builtin_func			func;
+}							t_builtin;
+
 // macro
 # define SINGLE_QUOTE '\''
 # define DOUBLE_QUOTE '"'
@@ -144,6 +152,7 @@ int							*get_status(void);
 t_data						*get_data(void);
 int							*get_heredoc_fd(int fd);
 // builtin
+int							ft_export(char **argv);
 int							execute_builtin(t_node *cmd_node);
 
 #endif

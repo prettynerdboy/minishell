@@ -111,17 +111,11 @@ static char	*process_double_quote(char *str, int *i)
 	while (str[*i] && str[*i] != '"')
 	{
 		if (str[*i] == '$')
-		{
 			result = handle_dollar_in_dquote(str, i, result);
-		}
 		else if (str[*i] == '\'')
-		{
 			result = handle_char_in_dquote(str, i, result);
-		}
 		else
-		{
 			result = handle_char_in_dquote(str, i, result);
-		}
 	}
 	if (str[*i] == '"')
 		(*i)++;

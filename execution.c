@@ -130,6 +130,24 @@ int	check_builtin(char *cmd)
 	return (0);
 }
 
+int	run_parent_builtin(t_node *current_node)
+{
+	int	status;
+
+	// パイプラインが1つのビルトインコマンドのみの場合
+	if (current_node->command && current_node->command->args)
+	{
+		// ビルトインコマンドを親プロセスで実行
+		status = execute_builtin(current_node->command);
+		if (status != -1)
+		{
+			*get_status() = status;
+			return (0);
+		}
+	}
+	return (1);
+}
+
 pid_t	run_pipeline(t_data *data)
 {
 	t_node		*current_node;
@@ -140,24 +158,21 @@ pid_t	run_pipeline(t_data *data)
 	char		**argv;
 	int			status;
 	int			redirect_status;
+	int			builtin_status;
 
 	if (data == NULL || data->nodes == NULL)
 		return (-1);
 	current_node = data->nodes;
+	if (!current_node->next)
+	{
+		builtin_status = run_parent_builtin(current_node);
+		if (builtin_status != 1)
+			return (builtin_status);
+	}
 	while (current_node != NULL)
 	{
 		if (current_node && current_node->next)
 			init_pipe(current_node);
-		if (!current_node->next)
-		{
-			// ビルトインコマンドの実行
-			status = execute_builtin(current_node->command);
-			if (status != -1) // ビルトインコマンドが実行された場合
-			{
-				*get_status() = status;
-				return (0);
-			}
-		}
 		pid = fork();
 		if (pid < 0)
 		{
@@ -168,8 +183,17 @@ pid_t	run_pipeline(t_data *data)
 		{ //小プロのエラー時に、エラー起きたらノードとか全部フリー
 			signal(SIGQUIT, SIG_DFL);
 			argv = token_to_argv(current_node->command->args);
+			if (!argv)
+				exit_with_status(data, 1);
 			cmd = argv[0];
+			// ビルトインコマンドの場合
 			connect_pipe(current_node);
+			if (check_builtin(cmd))
+			{
+				status = execute_builtin(current_node->command);
+				wp_free(&argv);
+				exit_with_status(data, status);
+			}
 			redirect_status = redirect(current_node->command->redirects);
 			if (redirect_status != 0)
 			{
@@ -177,11 +201,11 @@ pid_t	run_pipeline(t_data *data)
 				exit_with_status(data, redirect_status);
 			}
 			close_redirect_fds(current_node);
-			if (!cmd || check_builtin(cmd))
-			{
-				wp_free(&argv);
-				exit_with_status(data, 0); //これのexitstatusあってる？
-			}
+			// if (!cmd || check_builtin(cmd))
+			// {
+			// 	wp_free(&argv);
+			// 	exit_with_status(data, 0); //これのexitstatusあってる？
+			// }
 			path = make_path(cmd);
 			if (!path)
 			{

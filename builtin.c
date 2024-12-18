@@ -1,27 +1,27 @@
 #include "minishell.h"
 
-// builtin.h
-typedef int			(*t_builtin_func)(char **argv);
-
-typedef struct s_builtin
-{
-	char			*name;
-	t_builtin_func	func;
-}					t_builtin;
 
 // builtin.c
 int	ft_echo(char **argv)
 {
 	int	i;
 	int	n_option;
+	int	j;
 
 	n_option = 0;
 	i = 1;
-	if (argv[1] && ft_strcmp(argv[1], "-n") == 0)
+	while (argv[i] && argv[i][0] == '-')
 	{
+		j = 1;
+		while (argv[i][j] == 'n')
+			j++;
+		if (argv[i][j] != '\0' || j == 1)
+			break ;
 		n_option = 1;
 		i++;
 	}
+	if (ft_strcmp(argv[2], "-n") == 0)
+		return (0);
 	while (argv[i])
 	{
 		ft_putstr_fd(argv[i], STDOUT_FILENO);
@@ -36,8 +36,34 @@ int	ft_echo(char **argv)
 
 int	ft_cd(char **argv)
 {
+	char	*oldpwd;
 	char	*home;
 
+	oldpwd = getenv("OLDPWD");
+	if (argv[1] && ft_strcmp(argv[1], "-") == 0)
+	{
+		if (!oldpwd)
+		{
+			ft_putstr_fd("cd: OLDPWD not set\n", STDERR_FILENO);
+			return (1);
+		}
+		if (chdir(oldpwd) == -1)
+		{
+			perror("cd");
+			return (1);
+		}
+		printf("%s\n", oldpwd);
+		return (0);
+	}
+	if (argv[1] && argv[1][0] == '.' && argv[1][1] == '.')
+	{
+		if (chdir(oldpwd) == -1)
+		{
+			perror("cd");
+			return (1);
+		}
+		return (0);
+	}
 	if (!argv[1])
 	{
 		home = getenv("HOME");
@@ -69,45 +95,6 @@ int	ft_pwd(char **argv)
 	}
 	printf("%s\n", cwd);
 	free(cwd);
-	return (0);
-}
-
-int	ft_export(char **argv)
-{
-	int			i;
-	char		*equal_sign;
-	extern char	**environ;
-	char		**sorted_env;
-
-	i = 0;
-	if (!argv[1])
-	{
-		// 環境変数を表示（ソートされた順で）
-		sorted_env = environ;
-		// ここでソート処理を行う
-		while (sorted_env[i])
-		{
-			printf("declare -x %s\n", sorted_env[i]);
-			i++;
-		}
-		return (0);
-	}
-	i = 1;
-	while (argv[i])
-	{
-		equal_sign = ft_strchr(argv[i], '=');
-		if (equal_sign)
-		{
-			*equal_sign = '\0';
-			if (setenv(argv[i], equal_sign + 1, 1) == -1)
-			{
-				perror("export");
-				return (1);
-			}
-			*equal_sign = '=';
-		}
-		i++;
-	}
 	return (0);
 }
 
@@ -155,8 +142,6 @@ int	ft_exit(char **argv)
 	data = get_data();
 	if (!argv[1])
 	{
-		// free_token_list(&data->tokens);
-		// free_node(data->nodes);
 		printf("exit\n");
 		exit_with_status(data, 0);
 	}
@@ -166,7 +151,6 @@ int	ft_exit(char **argv)
 		ft_putstr_fd("exit: too many arguments\n", STDERR_FILENO);
 		return (1);
 	}
-
 	printf("exit\n");
 	exit_with_status(data, status);
 }
