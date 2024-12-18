@@ -53,7 +53,7 @@ int	is_blank(char c)
 
 int	is_meta(char c)
 {
-	if (is_blank(c) || (c && ft_strchr("|<>&()\n", c)))
+	if (is_blank(c) || (c && ft_strchr("|<>&%(){}[];:*~#@\n", c)))
 		return (1);
 	else
 		return (0);
@@ -89,7 +89,7 @@ t_token	*operator(char **rest, char *line)
 		}
 		i++;
 	}
-	perror("Unexpected operator");
+	ft_eprintf("Unexpected operator\n");
 	return (NULL);
 }
 
@@ -129,7 +129,7 @@ t_token	*word(char **rest, char *line)
 		{
 			if (!handle_quote(&line, SINGLE_QUOTE, &quote))
 			{
-				perror("Unclosed quote");
+				ft_eprintf("Unclosed quote\n");
 				return (NULL);
 			}
 			continue ;
@@ -138,7 +138,7 @@ t_token	*word(char **rest, char *line)
 		{
 			if (!handle_quote(&line, DOUBLE_QUOTE, &quote))
 			{
-				perror("Unclosed quote");
+				ft_eprintf("Unclosed quote\n");
 				return (NULL);
 			}
 			continue ;
@@ -147,7 +147,7 @@ t_token	*word(char **rest, char *line)
 	}
 	if (quote.in_single_quote || quote.in_double_quote) //冗長かも
 	{
-		perror("Unclosed quote");
+		ft_eprintf("Unclosed quote\n");
 		return (NULL);
 	}
 	word = ft_strndup(start, line - start);
@@ -239,7 +239,7 @@ static bool	check_consecutive_redirect_error(t_token *current)
 {
 	if (is_redirect_token(current) && is_redirect_token(current->next))
 	{
-		ft_putstr_fd("minishell: syntax error near unexpected token `",
+		ft_putstr_fd("minishell: syntax error near unexpected token `\n",
 			STDERR_FILENO);
 		ft_putstr_fd(current->next->word, STDERR_FILENO);
 		ft_putstr_fd("'\n", STDERR_FILENO);
