@@ -190,6 +190,12 @@ pid_t	run_pipeline(t_data *data)
 				wp_free(&argv);
 				exit_with_status(data, 127);
 			}
+			if (access(path, X_OK) != 0)
+			{
+				dprintf(2,"%s :Permission denied\n",path);
+				wp_free(&argv);
+				exit_with_status(data, 126);
+			}
 			execve(path, argv, environ);
 			free(path);
 			wp_free(&argv);
