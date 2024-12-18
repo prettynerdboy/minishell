@@ -23,10 +23,11 @@ static char	*find_cmd_path(char **path_arr, const char *cmd)
 		free(full_path);
 		i++;
 	}
-	dprintf(2, "%s command not found\n", cmd);
+	ft_eprintf("%s command not found\n", cmd);
 	return (NULL);
 }
 
+//befor
 static char	*check_path(const char *cmd)
 {
 	DIR	*dirp;
@@ -36,14 +37,14 @@ static char	*check_path(const char *cmd)
 	dirp = opendir(cmd);
 	if (dirp)
 	{
-		dprintf(2, "%s : Is a directory\n", cmd);
+		ft_eprintf("%s : Is a directory\n", cmd);
 		closedir(dirp);
 		return (NULL);
 	}
-	closedir(dirp);
+    closedir(dirp);
 	if (access(cmd, F_OK) == 0)
 		return (ft_strdup(cmd));
-	dprintf(2, "%s : No such file or directory\n", cmd);
+	ft_eprintf("%s : No such file or directory\n", cmd);
 	return (NULL);
 }
 
@@ -188,7 +189,7 @@ pid_t	run_pipeline(t_data *data)
 			}
 			if (access(path, X_OK) != 0)
 			{
-				dprintf(2,"%s :Permission denied\n",path);
+				ft_eprintf("%s :Permission denied\n",path);
 				wp_free(&argv);
 				exit_with_status(data, 126);
 			}

@@ -1,13 +1,14 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 # include "libft/libft.h"
+# include "./ft_eprintf/ft_eprintf.h"
 # include <errno.h>
 # include <fcntl.h>
+# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
 # include <unistd.h>
