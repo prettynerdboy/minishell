@@ -12,7 +12,6 @@ int	handle_heredoc(t_node *redirect_node)
 		perror("Failed to create pipe");
 		return (-1);
 	}
-	// printf("parent proccess = %d\n", getpid());
 	pid = fork();
 	if (pid == -1)
 	{
@@ -21,21 +20,16 @@ int	handle_heredoc(t_node *redirect_node)
 	}
 	if (pid == 0) // 子プロセス
 	{
-		// printf("pid: %d\n", getpid());
-		// printf("ppid: %d\n", getppid());
 		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
 		line = NULL;
 		while (1)
 		{
 			line = readline("> ");
-			// printf("line: %s\n", line);
 			if (!line)
 			{
 				close(fd[WRITE]);
 				close(fd[READ]);
-				// break ;
-				// exit(1);
+				break ;
 			}
 			if (ft_strcmp(line, redirect_node->delimiter->word) == 0)
 			{
@@ -52,16 +46,15 @@ int	handle_heredoc(t_node *redirect_node)
 	// 親プロセス
 	signal(SIGINT, SIG_IGN);
 	waitpid(pid, &status, 0);
-	// printf("status: %d\n", status);
-	// printf("signal status: %d, status: %d\n", WIFSIGNALED(status), status);
 	if (WIFSIGNALED(status)) // 子プロセスがシグナルで終了した場合
 	{
 		close(fd[READ]);
 		close(fd[WRITE]);
-		*get_status() = 1;
+		printf("\n");
+		if (WTERMSIG(status) == SIGINT)
+			return (-2);
 		return (-1);
 	}
-	signal(SIGINT, &signal_handler); // シグナルハンドラを元に戻す
 	close(fd[WRITE]);
 	return (fd[READ]);
 }
@@ -98,14 +91,7 @@ int	open_redir_file(t_node *node)
 				return (-1);
 		}
 		else
-		{
 			node->redirect_fd = handle_redirection(node);
-			// dprintf(2,"node->redirect_fd=%d",node->redirect_fd);
-			// if (node->redirect_fd < 0)
-			// {
-			//     perror(node->filename->word);
-			// }
-		}
 		node = node->next;
 	}
 	return (0);
@@ -130,6 +116,8 @@ int	redirect(t_node *redirect_node)
 		return (0);
 	if (is_redirect(redirect_node))
 	{
+		if (redirect_node->redirect_fd == -2)
+			return (SIGINT_STATUS);
 		if (redirect_node->redirect_fd < 0)
 			return (1);
 		dup2(redirect_node->redirect_fd, redirect_node->default_fd);

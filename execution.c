@@ -139,6 +139,7 @@ pid_t	run_pipeline(t_data *data)
 	pid_t		pid;
 	char		**argv;
 	int			status;
+	int			redirect_status;
 
 	if (data == NULL || data->nodes == NULL)
 		return (-1);
@@ -169,16 +170,17 @@ pid_t	run_pipeline(t_data *data)
 			argv = token_to_argv(current_node->command->args);
 			cmd = argv[0];
 			connect_pipe(current_node);
-			if (redirect(current_node->command->redirects) != 0)
+			redirect_status = redirect(current_node->command->redirects);
+			if (redirect_status != 0)
 			{
 				wp_free(&argv);
-				exit_with_status(data, 1);
+				exit_with_status(data, redirect_status);
 			}
 			close_redirect_fds(current_node);
 			if (!cmd || check_builtin(cmd))
 			{
 				wp_free(&argv);
-				exit_with_status(data, 0);//これのexitstatusあってる？
+				exit_with_status(data, 0); //これのexitstatusあってる？
 			}
 			path = make_path(cmd);
 			if (!path)
@@ -188,7 +190,7 @@ pid_t	run_pipeline(t_data *data)
 			}
 			if (access(path, X_OK) != 0)
 			{
-				dprintf(2,"%s :Permission denied\n",path);
+				dprintf(2, "%s :Permission denied\n", path);
 				wp_free(&argv);
 				exit_with_status(data, 126);
 			}
@@ -202,8 +204,6 @@ pid_t	run_pipeline(t_data *data)
 			close(current_node->inpipe[0]);
 		if (current_node->next)
 			close(current_node->outpipe[1]);
-		// close_pipe_fds(current_node);
-		// wp_free(&argv);
 		if (pid > 0)
 			close_redirect_fds(current_node->command);
 		current_node = current_node->next;
@@ -240,9 +240,6 @@ int	wait_process(pid_t last_pid)
 		printf("\n");
 		status = SIGINT_STATUS;
 	}
-	// dprintf(2, "signal status: %d, child_status: %d, child_pid: %d, coredump status:%d\n",
-	// 	WTERMSIG(child_status), child_status, child_pid, status);
-	// fflush(0);
 	signal(SIGINT, &signal_handler);
 	return (status);
 }

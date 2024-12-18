@@ -105,7 +105,6 @@ void	shell(char *line, int *status)
 	// printf("=== Syntax Tree ===\n");
 	// print_tree(nodes, 0);
 	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
-	// printf("open_redir_file\n");
 	*status = execution(data);
 	free_data(&data);
 	// printf("===================\n");

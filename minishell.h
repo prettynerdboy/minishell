@@ -116,6 +116,7 @@ t_node						*parser(t_token *tok);
 
 // signal
 void						signal_handler(int sig);
+void						reset_prompt(void);
 
 // redirect
 int							open_redir_file(t_node *node);
