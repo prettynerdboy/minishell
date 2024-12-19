@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signal.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 17:28:01 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/18 09:55:26 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 01:44:01 by soaoki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,21 @@ void	reset_prompt(void)
 	rl_replace_line("", 0); // 現在の入力行をクリア
 	rl_redisplay();         // プロンプトを再表示
 	*status = SIGINT_STATUS;
+}
+
+void child_signal_handler(int sig)
+{
+	int *fds;
+
+	fds = *heredoc_fds();
+	if (sig == SIGINT)
+	{
+		if (fds[0] > 2)
+			close(fds[0]);
+		if (fds[1] > 2)
+			close(fds[1]);
+		exit(130);
+	}
 }
 
 void	signal_handler(int sig)

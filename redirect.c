@@ -20,7 +20,8 @@ int	handle_heredoc(t_node *redirect_node)
 	}
 	if (pid == 0) // 子プロセス
 	{
-		signal(SIGINT, SIG_DFL);
+		*heredoc_fds() = fd;
+		signal(SIGINT, child_signal_handler);
 		line = NULL;
 		while (1)
 		{
@@ -41,18 +42,24 @@ int	handle_heredoc(t_node *redirect_node)
 			free(line);
 		}
 		close(fd[WRITE]);
+		close(fd[READ]);
 		exit(0);
 	}
 	// 親プロセス
 	signal(SIGINT, SIG_IGN);
 	waitpid(pid, &status, 0);
+	if (WEXITSTATUS(status))
+	{
+		close(fd[READ]);
+		close(fd[WRITE]);
+		printf("\n");
+		return (-2);
+	}
 	if (WIFSIGNALED(status)) // 子プロセスがシグナルで終了した場合
 	{
 		close(fd[READ]);
 		close(fd[WRITE]);
 		printf("\n");
-		if (WTERMSIG(status) == SIGINT)
-			return (-2);
 		return (-1);
 	}
 	close(fd[WRITE]);
