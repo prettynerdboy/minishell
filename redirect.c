@@ -72,6 +72,7 @@ int	handle_heredoc(t_node *redirect_node)
 	*get_status() = 0;
 	return (fd[READ]);
 }
+
 int	handle_redirection(t_node *redirect_node)
 {
 	if (redirect_node->kind == ND_REDIR_OUT)
