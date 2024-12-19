@@ -6,7 +6,7 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/20 03:30:43 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/20 04:18:33 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 05:57:13 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ char	*process_single_quote(char *str, int *i)
 
 char	*process_double_quote(char *str, int *i)
 {
-	char *result;
+	char	*result;
 
 	result = ft_strdup("");
 	(*i)++;

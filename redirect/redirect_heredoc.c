@@ -6,7 +6,7 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/20 04:36:55 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/20 05:24:09 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 05:58:37 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,9 @@ static pid_t	check_run_heredoc(int fd[2])
 {
 	pid_t	pid;
 
-	if ((*is_pipe_heredoc() && *is_run_heredoc() && *get_status() == 130)
-		|| (!*is_pipe_heredoc()) && *is_run_heredoc())
+	if ((*is_pipe_heredoc() && *is_run_heredoc() && *get_status() == 130))
+		return ((pid_t)-2);
+	if ((!*is_pipe_heredoc()) && *is_run_heredoc())
 		return ((pid_t)-2);
 	if (pipe(fd) < 0)
 	{
