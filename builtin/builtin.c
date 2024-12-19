@@ -6,11 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:07:16 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 13:48:28 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 05:45:28 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
 
 // リダイレクトなしの場合の実行関数
 static int	execute_builtin_simple(char **argv)

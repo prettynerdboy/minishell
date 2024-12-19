@@ -1,78 +1,18 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redirect.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/20 04:36:26 by hauchida          #+#    #+#             */
+/*   Updated: 2024/12/20 05:27:34 by hauchida         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int	handle_heredoc(t_node *redirect_node)
-{
-	int		fd[2];
-	char	*line;
-	pid_t	pid;
-	int		status;
+#include "redirect.h"
 
-	if ((*is_pipe_heredoc() && *is_run_heredoc() && *get_status() == 130)
-		|| (!*is_pipe_heredoc()) && *is_run_heredoc())
-		return (-2);
-	if (pipe(fd) < 0)
-	{
-		perror("Failed to create pipe");
-		return (-1);
-	}
-	*is_run_heredoc() = 1;
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		return (-1);
-	}
-	if (pid == 0) // 子プロセス
-	{
-		*heredoc_fds() = fd;
-		signal(SIGINT, child_signal_handler);
-		line = NULL;
-		while (1)
-		{
-			line = readline("> ");
-			if (!line)
-			{
-				close(fd[WRITE]);
-				close(fd[READ]);
-				break ;
-			}
-			if (ft_strcmp(line, redirect_node->delimiter->word) == 0)
-			{
-				free(line);
-				break ;
-			}
-			write(fd[WRITE], line, ft_strlen(line));
-			write(fd[WRITE], "\n", 1);
-			free(line);
-		}
-		close(fd[WRITE]);
-		close(fd[READ]);
-		exit(0);
-	}
-	// 親プロセス
-	signal(SIGINT, SIG_IGN);
-	waitpid(pid, &status, 0);
-	if (WEXITSTATUS(status))
-	{
-		close(fd[READ]);
-		close(fd[WRITE]);
-		printf("\n");
-		*get_status() = 130;
-		return (-2);
-	}
-	if (WIFSIGNALED(status)) // 子プロセスがシグナルで終了した場合
-	{
-		close(fd[READ]);
-		close(fd[WRITE]);
-		printf("\n");
-		*get_status() = 1;
-		return (-1);
-	}
-	close(fd[WRITE]);
-	*get_status() = 0;
-	return (fd[READ]);
-}
-int	handle_redirection(t_node *redirect_node)
+static int	handle_redirection(t_node *redirect_node)
 {
 	if (redirect_node->kind == ND_REDIR_OUT)
 		return (open(redirect_node->filename->word,
@@ -91,7 +31,6 @@ int	handle_redirection(t_node *redirect_node)
 
 int	open_redir_file(t_node *node)
 {
-	// printf("node->kind = %d\n", node->kind);
 	while (node)
 	{
 		if (node->kind == ND_PIPELINE)

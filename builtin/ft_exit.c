@@ -6,11 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:19:37 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 13:22:06 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:08:49 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
 
 int	is_numeric(char *s)
 {

@@ -6,11 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 05:29:58 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 09:30:55 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:08:51 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
 
 void	print_allenv(void)
 {
