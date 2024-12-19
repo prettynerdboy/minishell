@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
+#    By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/19 09:31:48 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/20 05:22:56 by soaoki           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,10 +15,19 @@ LIB_DIR		= libft
 EPRINTF_DIR	= ft_eprintf
 LIB_NAME	= $(LIB_DIR)/libft.a
 EPRINTF_NAME	= $(EPRINTF_DIR)/libfteprintf.a
-SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c \
-				free.c redirect.c error.c status.c map.c env.c \
+SRCS    	= main.c signal.c expand.c \
+				redirect.c map.c env.c \
 				builtin/builtin.c builtin/ft_export.c builtin/ft_unset.c builtin/ft_env.c \
-				builtin/ft_echo.c builtin/ft_exit.c builtin/ft_pwd.c builtin/ft_cd.c
+				builtin/ft_echo.c builtin/ft_exit.c builtin/ft_pwd.c builtin/ft_cd.c\
+				tokenize_is.c tokenize_util.c tokenize_main.c tokenize_syntax.c\
+				execution_buitin.c execution_path.c execution_pipe.c\
+				execution_util.c execution_wait.c execution_main.c\
+				free_basic.c free_wrap.c\
+				parser_main.c parser_util.c parser_redirect.c\
+				status_is.c status_get.c\
+				
+				
+				
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
 LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -I $(EPRINTF_DIR) $(EPRINTF_NAME) -lreadline

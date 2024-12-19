@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 05:21:41 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 07:26:40 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:17:01 by soaoki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,12 @@ static void	envmap_init(t_map *map, char **ep)
 		ep++;
 	}
 }
+
 char	*xgetenv(const char *name)
 {
 	return (map_get(*get_envmap(), name));
 }
+
 void	initenv(void)
 {
 	extern char	**environ;
@@ -33,6 +35,7 @@ void	initenv(void)
 	*envmap = map_new();
 	envmap_init(*envmap, environ);
 }
+
 char	**get_environ(t_map *map)
 {
 	size_t	i;

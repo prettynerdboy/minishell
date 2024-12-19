@@ -151,6 +151,16 @@ int							redirect(t_node *redir);
 void						close_redirect_fds(t_node *node);
 int							handle_heredoc(t_node *redirect_node);
 
+//path
+char						*find_cmd_path(char **path_arr, const char *cmd);
+char						*check_path(const char *cmd);
+char						*make_path(const char *cmd);
+//pipe
+void						init_pipe(t_node *node);
+void						connect_pipe(t_node *node);
+//builtin
+int							check_builtin(char *cmd);
+int							run_parent_builtin(t_node *current_node);
 // exev
 int							execution(t_data *data);
 pid_t						run_pipeline(t_data *data);
