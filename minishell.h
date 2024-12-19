@@ -143,7 +143,7 @@ t_node						*parser(t_token *tok);
 // signal
 void						signal_handler(int sig);
 void						reset_prompt(void);
-void 						child_signal_handler(int sig);
+void						child_signal_handler(int sig);
 // redirect
 int							open_redir_file(t_node *node);
 int							handle_redirection(t_node *node);
@@ -188,8 +188,9 @@ char						**get_environ(t_map *map);
 int							*get_status(void);
 t_data						*get_data(void);
 t_map						**get_envmap(void);
-int 						**heredoc_fds(void);
-
+int							**heredoc_fds(void);
+int							*is_pipe_heredoc(void);
+int							*is_run_heredoc(void);
 // builtin
 int							ft_export(char **argv);
 int							ft_unset(char **argv);

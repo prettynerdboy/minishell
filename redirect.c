@@ -7,11 +7,15 @@ int	handle_heredoc(t_node *redirect_node)
 	pid_t	pid;
 	int		status;
 
+	if ((*is_pipe_heredoc() && *is_run_heredoc() && *get_status() == 130)
+		|| (!*is_pipe_heredoc()) && *is_run_heredoc())
+		return (-2);
 	if (pipe(fd) < 0)
 	{
 		perror("Failed to create pipe");
 		return (-1);
 	}
+	*is_run_heredoc() = 1;
 	pid = fork();
 	if (pid == -1)
 	{
@@ -53,6 +57,7 @@ int	handle_heredoc(t_node *redirect_node)
 		close(fd[READ]);
 		close(fd[WRITE]);
 		printf("\n");
+		*get_status() = 130;
 		return (-2);
 	}
 	if (WIFSIGNALED(status)) // 子プロセスがシグナルで終了した場合
@@ -60,9 +65,11 @@ int	handle_heredoc(t_node *redirect_node)
 		close(fd[READ]);
 		close(fd[WRITE]);
 		printf("\n");
+		*get_status() = 1;
 		return (-1);
 	}
 	close(fd[WRITE]);
+	*get_status() = 0;
 	return (fd[READ]);
 }
 int	handle_redirection(t_node *redirect_node)

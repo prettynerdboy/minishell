@@ -203,7 +203,8 @@ pid_t	run_pipeline(t_data *data)
 			if (redirect_status != 0)
 			{
 				if (redirect_status != 130)
-					ft_eprintf("%s : No such file or directory\n", current_node->command->redirects->filename->word);
+					ft_eprintf("%s : No such file or directory\n",
+						current_node->command->redirects->filename->word);
 				wp_free(&argv);
 				exit_with_status(data, redirect_status);
 			}

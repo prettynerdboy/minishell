@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signal.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soaoki <soaoki@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 17:28:01 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/20 01:44:01 by soaoki           ###   ########.fr       */
+/*   Updated: 2024/12/20 02:59:33 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,18 +25,21 @@ void	reset_prompt(void)
 	*status = SIGINT_STATUS;
 }
 
-void child_signal_handler(int sig)
+void	child_signal_handler(int sig)
 {
-	int *fds;
+	int		*fds;
+	t_data	*data;
 
 	fds = *heredoc_fds();
+	data = get_data();
 	if (sig == SIGINT)
 	{
 		if (fds[0] > 2)
 			close(fds[0]);
 		if (fds[1] > 2)
 			close(fds[1]);
-		exit(130);
+		close_redirect_fds(data->nodes);
+		exit_with_status(data, 130);
 	}
 }
 

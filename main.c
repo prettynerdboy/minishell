@@ -103,6 +103,8 @@ void	shell(char *line)
 		free_token_list(&data->tokens);
 		return ;
 	}
+	if (data->nodes->next)
+		*is_pipe_heredoc() = 1;
 	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
 	status = execution(data);
 	if (status >= 0)
@@ -119,6 +121,8 @@ int	main(void)
 	initenv();
 	while (1)
 	{
+		*is_pipe_heredoc() = 0;
+		*is_run_heredoc() = 0;
 		line = readline("minishell$ ");
 		if (line == NULL)
 			break ;

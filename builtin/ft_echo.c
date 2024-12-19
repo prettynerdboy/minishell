@@ -6,7 +6,7 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:16:43 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 13:27:38 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 03:11:20 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ int	ft_echo(char **argv)
 		n_option = 1;
 		i++;
 	}
-	if (ft_strcmp(argv[2], "-n") == 0)
-		return (0);
 	while (argv[i])
 	{
 		ft_putstr_fd(argv[i], STDOUT_FILENO);
