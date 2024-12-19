@@ -13,3 +13,10 @@ t_data	*get_data(void)
 
 	return (&data);
 }
+
+t_map	**get_envmap(void)
+{
+	static t_map	*envmap;
+
+	return (&envmap);
+}

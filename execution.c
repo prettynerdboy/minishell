@@ -27,7 +27,7 @@ static char	*find_cmd_path(char **path_arr, const char *cmd)
 	return (NULL);
 }
 
-//befor
+// befor
 static char	*check_path(const char *cmd)
 {
 	DIR	*dirp;
@@ -41,7 +41,7 @@ static char	*check_path(const char *cmd)
 		closedir(dirp);
 		return (NULL);
 	}
-    closedir(dirp);
+	closedir(dirp);
 	if (access(cmd, F_OK) == 0)
 		return (ft_strdup(cmd));
 	ft_eprintf("%s : No such file or directory\n", cmd);
@@ -58,9 +58,12 @@ static char	*make_path(const char *cmd)
 		return (NULL);
 	if (cmd[0] == '/' || cmd[0] == '.')
 		return (check_path(cmd));
-	path_env = getenv("PATH");
+	path_env = xgetenv("PATH");
 	if (!path_env)
+	{
+		ft_eprintf("%s: No such file or directory\n", cmd);
 		return (NULL);
+	}
 	path_arr = ft_split(path_env, ':');
 	if (!path_arr)
 		return (NULL);
@@ -141,10 +144,7 @@ int	run_parent_builtin(t_node *current_node)
 		// ビルトインコマンドを親プロセスで実行
 		status = execute_builtin(current_node->command);
 		if (status != -1)
-		{
-			*get_status() = status;
-			return (0);
-		}
+			return (status);
 	}
 	return (1);
 }
@@ -168,7 +168,10 @@ pid_t	run_pipeline(t_data *data)
 	{
 		builtin_status = run_parent_builtin(current_node);
 		if (builtin_status != 1)
-			return (builtin_status);
+		{
+			*get_status() = builtin_status;
+			return (-1);
+		}
 	}
 	while (current_node != NULL)
 	{
@@ -185,13 +188,14 @@ pid_t	run_pipeline(t_data *data)
 			signal(SIGQUIT, SIG_DFL);
 			argv = token_to_argv(current_node->command->args);
 			if (!argv)
-				exit_with_status(data, 1);
+				exit_with_status(data, EXIT_FAILURE);
 			cmd = argv[0];
 			// ビルトインコマンドの場合
 			connect_pipe(current_node);
 			if (check_builtin(cmd))
 			{
 				status = execute_builtin(current_node->command);
+				ft_eprintf("status: %d\n", status);
 				wp_free(&argv);
 				exit_with_status(data, status);
 			}
@@ -203,11 +207,6 @@ pid_t	run_pipeline(t_data *data)
 				exit_with_status(data, redirect_status);
 			}
 			close_redirect_fds(current_node);
-			// if (!cmd || check_builtin(cmd))
-			// {
-			// 	wp_free(&argv);
-			// 	exit_with_status(data, 0); //これのexitstatusあってる？
-			// }
 			path = make_path(cmd);
 			if (!path)
 			{
@@ -216,7 +215,7 @@ pid_t	run_pipeline(t_data *data)
 			}
 			if (access(path, X_OK) != 0)
 			{
-				ft_eprintf("%s :Permission denied\n",path);
+				ft_eprintf("%s :Permission denied\n", path);
 				wp_free(&argv);
 				exit_with_status(data, 126);
 			}
@@ -276,6 +275,11 @@ int	execution(t_data *data)
 	pid_t	pid;
 
 	pid = run_pipeline(data);
-	status = wait_process(pid);
-	return (status);
+	if (pid > 0)
+	{
+		status = wait_process(pid);
+		return (status);
+	}
+	else
+		return (-1);
 }

@@ -1,34 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_isdigit.c                                       :+:      :+:    :+:   */
+/*   ft_unset.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/15 22:34:47 by soaoki            #+#    #+#             */
-/*   Updated: 2024/12/19 13:11:39 by hauchida         ###   ########.fr       */
+/*   Created: 2024/12/19 09:08:26 by hauchida          #+#    #+#             */
+/*   Updated: 2024/12/19 10:45:41 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../minishell.h"
 
-int	ft_isdigit(int c)
+int	ft_unset(char **argv)
 {
-	if (c >= '0' && c <= '9')
-		return (1);
-	else
-		return (0);
-}
+	int		status;
+	size_t	i;
 
-// #include <ctype.h>
-// #include <stdio.h>
-// int	main(void)
-// {
-// 	printf("%d\n", ft_isdigit('0'));
-// 	printf("%d\n", isdigit('0'));
-// 	printf("%d\n", ft_isdigit('a'));
-// 	printf("%d\n", isdigit('a'));
-// 	printf("%d\n", ft_isdigit('-'));
-// 	printf("%d\n", isdigit('-'));
-// 	return (0);
-// }
+	status = 0;
+	i = 1;
+	while (argv[i])
+	{
+		if (map_unset(*get_envmap(), argv[i]) < 0)
+		{
+			ft_eprintf("unset: %s not a valid identifier\n", argv[i]);
+			status = 1;
+		}
+		else
+			status = 0;
+		i++;
+	}
+	return (status);
+}

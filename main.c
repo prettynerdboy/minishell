@@ -78,21 +78,22 @@ void	print_tree(t_node *node, int depth)
 // shell起動関数
 // *第１引数 line - 入力されたコマンドライン文字列
 // *第２引数 status - ?
-void	shell(char *line, int *status)
+void	shell(char *line)
 {
 	t_data	*data;
+	int		status;
 
 	data = get_data();
 	data->tokens = tokenizer(line);
 	if (data->tokens == NULL)
 	{
-		*status = 258;
+		status = 258;
 		return ;
 	}
 	expand_tokens(data->tokens);
 	if (!check_syntax_error(data->tokens))
 	{
-		*status = 258;
+		status = 258;
 		free_token_list(&data->tokens);
 		return ;
 	}
@@ -103,19 +104,19 @@ void	shell(char *line, int *status)
 		return ;
 	}
 	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
-	*status = execution(data);
+	status = execution(data);
+	if (status >= 0)
+		*get_status() = status;
 	free_data(&data);
 }
 
 int	main(void)
 {
-	int		*status;
-	int		*loading;
 	char	*line;
 
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, &signal_handler);
-	status = get_status();
+	initenv();
 	while (1)
 	{
 		line = readline("minishell$ ");
@@ -123,8 +124,8 @@ int	main(void)
 			break ;
 		if (*line)
 			add_history(line);
-		shell(line, status);
+		shell(line);
 		free(line);
 	}
-	exit(*status);
+	exit(*get_status());
 }

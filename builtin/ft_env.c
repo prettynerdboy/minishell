@@ -1,34 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_isdigit.c                                       :+:      :+:    :+:   */
+/*   ft_env.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/15 22:34:47 by soaoki            #+#    #+#             */
-/*   Updated: 2024/12/19 13:11:39 by hauchida         ###   ########.fr       */
+/*   Created: 2024/12/19 09:13:00 by hauchida          #+#    #+#             */
+/*   Updated: 2024/12/19 09:14:22 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../minishell.h"
 
-int	ft_isdigit(int c)
+int	ft_env(char **argv)
 {
-	if (c >= '0' && c <= '9')
-		return (1);
-	else
-		return (0);
+	t_item *cur;
+	(void)argv;
+	cur = (*get_envmap())->item_head.next;
+	while (cur)
+	{
+		if (cur->value)
+			printf("%s=%s\n", cur->name, cur->value);
+		cur = cur->next;
+	}
+	printf("_=/usr/bin/env\n");
+	return (0);
 }
-
-// #include <ctype.h>
-// #include <stdio.h>
-// int	main(void)
-// {
-// 	printf("%d\n", ft_isdigit('0'));
-// 	printf("%d\n", isdigit('0'));
-// 	printf("%d\n", ft_isdigit('a'));
-// 	printf("%d\n", isdigit('a'));
-// 	printf("%d\n", ft_isdigit('-'));
-// 	printf("%d\n", isdigit('-'));
-// 	return (0);
-// }
