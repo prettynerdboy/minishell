@@ -1,159 +1,17 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtin.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/19 09:07:16 by hauchida          #+#    #+#             */
+/*   Updated: 2024/12/19 13:48:28 by hauchida         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../minishell.h"
 
-// builtin.c
-int	ft_echo(char **argv)
-{
-	int	i;
-	int	n_option;
-	int	j;
-
-	n_option = 0;
-	i = 1;
-	while (argv[i] && argv[i][0] == '-')
-	{
-		j = 1;
-		while (argv[i][j] == 'n')
-			j++;
-		if (argv[i][j] != '\0' || j == 1)
-			break ;
-		n_option = 1;
-		i++;
-	}
-	if (ft_strcmp(argv[2], "-n") == 0)
-		return (0);
-	while (argv[i])
-	{
-		ft_putstr_fd(argv[i], STDOUT_FILENO);
-		if (argv[i + 1])
-			ft_putchar_fd(' ', STDOUT_FILENO);
-		i++;
-	}
-	if (!n_option)
-		ft_putchar_fd('\n', STDOUT_FILENO);
-	return (0);
-}
-
-int	ft_cd(char **argv)
-{
-	char	*oldpwd;
-	char	*home;
-
-	oldpwd = getenv("OLDPWD");
-	if (argv[1] && ft_strcmp(argv[1], "-") == 0)
-	{
-		if (!oldpwd)
-		{
-			ft_putstr_fd("cd: OLDPWD not set\n", STDERR_FILENO);
-			return (1);
-		}
-		if (chdir(oldpwd) == -1)
-		{
-			perror("cd");
-			return (1);
-		}
-		printf("%s\n", oldpwd);
-		return (0);
-	}
-	if (argv[1] && argv[1][0] == '.' && argv[1][1] == '.')
-	{
-		if (chdir(oldpwd) == -1)
-		{
-			perror("cd");
-			return (1);
-		}
-		return (0);
-	}
-	if (!argv[1])
-	{
-		home = getenv("HOME");
-		if (!home)
-		{
-			ft_putstr_fd("cd: HOME not set\n", STDERR_FILENO);
-			return (1);
-		}
-		return (chdir(home));
-	}
-	if (chdir(argv[1]) == -1)
-	{
-		perror("cd");
-		return (1);
-	}
-	return (0);
-}
-
-int	ft_pwd(char **argv)
-{
-	char	*cwd;
-
-	(void)argv;
-	cwd = getcwd(NULL, 0);
-	if (!cwd)
-	{
-		perror("pwd");
-		return (1);
-	}
-	printf("%s\n", cwd);
-	free(cwd);
-	return (0);
-}
-
-int	ft_unset(char **argv)
-{
-	int	i;
-
-	i = 1;
-	while (argv[i])
-	{
-		if (unsetenv(argv[i]) == -1)
-		{
-			perror("unset");
-			return (1);
-		}
-		i++;
-	}
-	return (0);
-}
-
-int	ft_env(char **argv)
-{
-	extern char	**environ;
-	int			i;
-
-	if (argv[1])
-	{
-		ft_putstr_fd("env: too many arguments\n", STDERR_FILENO);
-		return (1);
-	}
-	i = 0;
-	while (environ[i])
-	{
-		printf("%s\n", environ[i]);
-		i++;
-	}
-	return (0);
-}
-
-int	ft_exit(char **argv)
-{
-	int		status;
-	t_data	*data;
-
-	data = get_data();
-	if (!argv[1])
-	{
-		printf("exit\n");
-		exit_with_status(data, 0);
-	}
-	status = ft_atoi(argv[1]);
-	if (argv[2])
-	{
-		ft_putstr_fd("exit: too many arguments\n", STDERR_FILENO);
-		return (1);
-	}
-	printf("exit\n");
-	exit_with_status(data, status);
-}
 // リダイレクトなしの場合の実行関数
 static int	execute_builtin_simple(char **argv)
 {
@@ -191,7 +49,9 @@ static int	handle_builtin_redirect(t_node *cmd_node,
 	{
 		close(original_stdout);
 		close(original_stdin);
-		return (1);
+		ft_eprintf("%s: No such file or directory\n",
+			cmd_node->redirects->filename->word);
+		return (127);
 	}
 	// コマンドライン引数の準備
 	argv = token_to_argv(cmd_node->args);
@@ -215,19 +75,17 @@ static int	handle_builtin_redirect(t_node *cmd_node,
 // メインの実行関数
 int	execute_builtin(t_node *cmd_node)
 {
-	char **argv;
-	int status;
+	char	**argv;
+	int		status;
 
 	if (!cmd_node || !cmd_node->args)
 		return (-1);
-
 	// リダイレクトの有無で処理を分岐
 	if (cmd_node->redirects)
 	{
 		argv = token_to_argv(cmd_node->args);
 		if (!argv)
 			return (1);
-
 		if (ft_strcmp(argv[0], "echo") == 0)
 			status = handle_builtin_redirect(cmd_node, ft_echo);
 		else if (ft_strcmp(argv[0], "cd") == 0)
@@ -244,7 +102,6 @@ int	execute_builtin(t_node *cmd_node)
 			status = handle_builtin_redirect(cmd_node, ft_exit);
 		else
 			status = -1;
-
 		wp_free(&argv);
 		return (status);
 	}
@@ -254,7 +111,6 @@ int	execute_builtin(t_node *cmd_node)
 		argv = token_to_argv(cmd_node->args);
 		if (!argv)
 			return (1);
-
 		status = execute_builtin_simple(argv);
 		wp_free(&argv);
 		return (status);

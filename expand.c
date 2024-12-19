@@ -56,7 +56,7 @@ static char	*expand_env_var(char *str, int *i)
 	var_name = get_var_name(str, i, start);
 	if (!var_name)
 		return (ft_strdup("$"));
-	var_value = getenv(var_name);
+	var_value = xgetenv(var_name);
 	free(var_name);
 	if (var_value)
 		return (ft_strdup(var_value));

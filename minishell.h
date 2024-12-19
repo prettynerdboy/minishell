@@ -1,17 +1,17 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
-# include "libft/libft.h"
 # include "./ft_eprintf/ft_eprintf.h"
+# include "libft/libft.h"
 # include <errno.h>
 # include <fcntl.h>
-# include <stdio.h> //for mac
 # include <readline/history.h>
 # include <readline/readline.h>
-# include <sys/wait.h>
 # include <signal.h>
 # include <stdbool.h>
+# include <stdio.h> //for mac
 # include <stdlib.h>
 # include <sys/types.h>
+# include <sys/wait.h>
 # include <unistd.h>
 
 // struct
@@ -69,8 +69,22 @@ typedef struct s_data
 {
 	t_token					*tokens;
 	t_node					*nodes;
-	char					**environ;
 }							t_data;
+
+typedef struct s_map		t_map;
+typedef struct s_env_item	t_item;
+
+struct						s_env_item
+{
+	char					*name;
+	char					*value;
+	t_item					*next;
+};
+
+struct						s_map
+{
+	t_item					item_head;
+};
 
 typedef int					(*t_builtin_func)(char **argv);
 
@@ -150,13 +164,39 @@ void						free_token_list(t_token **head);
 void						free_node(t_node **node);
 void						free_data(t_data **data);
 void						exit_with_status(t_data *data, int status);
+void						free_envmap(void);
+
+// map
+t_item						*item_new(char *name, char *value);
+char						*item_get_string(t_item *item);
+t_map						*map_new(void);
+char						*map_get(t_map *map, const char *name);
+int							map_put(t_map *map, const char *string,
+								bool allow_empty_value);
+int							map_set(t_map *map, const char *name,
+								const char *value);
+int							map_unset(t_map *map, const char *name);
+size_t						map_len(t_map *map, bool count_null_value);
+void						map_initialize(t_map *map, char *string);
+
+// environment.c
+char						*xgetenv(const char *name);
+void						initenv(void);
+char						**get_environ(t_map *map);
 
 // status
 int							*get_status(void);
 t_data						*get_data(void);
-int							*get_heredoc_fd(int fd);
+t_map						**get_envmap(void);
+
 // builtin
 int							ft_export(char **argv);
+int							ft_unset(char **argv);
+int							ft_env(char **argv);
+int							ft_echo(char **argv);
+int							ft_cd(char **argv);
+int							ft_pwd(char **argv);
+int							ft_exit(char **argv);
 int							execute_builtin(t_node *cmd_node);
 
 #endif
