@@ -198,6 +198,7 @@ int	map_set(t_map *map, const char *name, const char *value)
 	}
 	return (0);
 }
+
 int	map_put(t_map *map, const char *string, bool allow_empty_value)
 {
 	int		result;
@@ -211,6 +212,7 @@ int	map_put(t_map *map, const char *string, bool allow_empty_value)
 	free(value);
 	return (result);
 }
+
 size_t	map_len(t_map *map, bool count_null_value)
 {
 	size_t	len;

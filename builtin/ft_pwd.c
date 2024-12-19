@@ -6,12 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:19:14 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 11:04:31 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:08:55 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
-#include <sys/stat.h>
+#include "minishell.h"
 
 int	ft_pwd(char **argv)
 {

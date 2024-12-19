@@ -6,11 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:16:43 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/20 03:11:20 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:08:45 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
 
 int	ft_echo(char **argv)
 {

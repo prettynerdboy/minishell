@@ -6,11 +6,11 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:18:52 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/19 13:06:08 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 04:08:43 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
 
 #define PATHNAME_SIZE 512
 

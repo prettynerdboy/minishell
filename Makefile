@@ -6,7 +6,7 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/19 09:31:48 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/20 05:50:45 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,12 +15,44 @@ LIB_DIR		= libft
 EPRINTF_DIR	= ft_eprintf
 LIB_NAME	= $(LIB_DIR)/libft.a
 EPRINTF_NAME	= $(EPRINTF_DIR)/libfteprintf.a
-SRCS    	= main.c parser.c signal.c tokenize.c execution.c expand.c \
-				free.c redirect.c error.c status.c map.c env.c \
-				builtin/builtin.c builtin/ft_export.c builtin/ft_unset.c builtin/ft_env.c \
-				builtin/ft_echo.c builtin/ft_exit.c builtin/ft_pwd.c builtin/ft_cd.c
+
+INCLUDES = -I include
+
+SRC_DIR     =
+BUILTIN_DIR = $(SRC_DIR)builtin
+EXPAND_DIR  = $(SRC_DIR)expand
+REDIRECT_DIR = $(SRC_DIR)redirect
+
+BUILTIN_SRCS = $(addprefix $(BUILTIN_DIR)/, builtin.c ft_export.c ft_unset.c ft_cd.c ft_env.c ft_echo.c ft_exit.c ft_pwd.c)
+EXPAND_SRCS  = $(addprefix $(EXPAND_DIR)/, expand_tokens.c expand_word.c expand_quote.c expand_var.c)
+REDIRECT_SRCS  = $(addprefix $(REDIRECT_DIR)/, redirect_heredoc.c redirect.c)
+
+SRCS = $(addprefix $(SRC_DIR), main.c signal.c \
+            	map.c env.c \
+				tokenize_is.c tokenize_util.c tokenize_main.c tokenize_syntax.c \
+				execution_buitin.c execution_path.c execution_pipe.c \
+				execution_util.c execution_wait.c execution_main.c \
+				free_basic.c free_wrap.c \
+				parser_main.c parser_util.c parser_redirect.c \
+				status_is.c status_get.c ) \
+       $(BUILTIN_SRCS) \
+       $(EXPAND_SRCS) \
+	   $(REDIRECT_SRCS)
+				
+# SRCS    	= main.c signal.c expand.c \
+# 				map.c env.c \
+# 				tokenize_is.c tokenize_util.c tokenize_main.c tokenize_syntax.c\
+# 				execution_buitin.c execution_path.c execution_pipe.c\
+# 				execution_util.c execution_wait.c execution_main.c\
+# 				free_basic.c free_wrap.c\
+# 				parser_main.c parser_util.c parser_redirect.c\
+# 				status_is.c status_get.c\
+				
+				
+				
 OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
+CFLAGS		= $(INCLUDES)
 LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -I $(EPRINTF_DIR) $(EPRINTF_NAME) -lreadline
 
 # TODO CFLAGS 後で追加
@@ -37,10 +69,9 @@ $(EPRINTF_NAME):
 
 # TODO CFLAGS 後で追加する
 $(NAME): $(SRCS)
-	$(CC) $^ -o $@ $(LDFLAGS) $(DEBUG_FLAGS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(DEBUG_FLAGS)
 
 clean:
-	rm -f $(OBJS)
 	$(MAKE) -C $(LIB_DIR) clean
 	$(MAKE) -C $(EPRINTF_DIR) clean
 fclean: clean
