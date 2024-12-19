@@ -123,7 +123,7 @@ t_token	*word(char **rest, char *line)
 	t_quote_state	quote;
 
 	quote = (t_quote_state){false, false};
-	while (*line && !is_meta(*line))
+	while (*line)
 	{
 		if (*line == SINGLE_QUOTE && !quote.in_double_quote)
 		{
@@ -143,6 +143,8 @@ t_token	*word(char **rest, char *line)
 			}
 			continue ;
 		}
+		if (!quote.in_single_quote && !quote.in_double_quote && is_meta(*line))
+			break;
 		line++;
 	}
 	if (quote.in_single_quote || quote.in_double_quote) //冗長かも
@@ -168,7 +170,7 @@ t_token	*tokenizer(char *line)
 	{
 		if (is_blank(*line))
 			line++;
-		else if (is_meta(*line))
+		else if (is_meta(*line) && !is_word(*line))
 		{
 			tok->next = operator(&line, line);
 			if (tok->next == NULL)
@@ -178,7 +180,7 @@ t_token	*tokenizer(char *line)
 			}
 			tok = tok->next;
 		}
-		else if (is_word(*line))
+		else
 		{
 			tok->next = word(&line, line);
 			if (tok->next == NULL)
@@ -187,13 +189,6 @@ t_token	*tokenizer(char *line)
 				return (NULL);
 			}
 			tok = tok->next;
-		}
-		else
-		{
-			free_token_list(&head.next);
-			ft_putstr_fd("minishell: syntax error near unexpected token\n",
-				STDERR_FILENO);
-			return (NULL);
 		}
 	}
 	tok->next = new_token(NULL, TK_EOF);
@@ -272,4 +267,25 @@ bool	check_syntax_error(t_token *tokens)
 		current = current->next;
 	}
 	return (true);
+}
+
+int	token_is(t_token *token, const char *str)
+{
+	size_t	i;
+
+	i = 0;
+	if (!token || !token->word || !str)
+		return (-1);
+	if (token->type != TK_OP && ft_strchr("|<>", str[0]))
+		return (0);
+	while (token->word[i] && str[i])
+	{
+		if (token->word[i] != str[i])
+			return (0);
+		i++;
+	}
+	if (token->word[i] == '\0' && str[i] == '\0')
+		return (1);
+	else
+		return (0);
 }

@@ -7,6 +7,13 @@ int	*get_status(void)
 	return (&g_status);
 }
 
+int **heredoc_fds(void)
+{
+	static int *fds;
+
+	return (&fds);
+}
+
 t_data	*get_data(void)
 {
 	static t_data	data;
