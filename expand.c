@@ -161,20 +161,61 @@ static char	*expand_word(char *word)
 	return (result);
 }
 
+// void	expand_tokens(t_token *tokens)
+// {
+// 	t_token *current;
+// 	char *expanded;
+
+// 	current = tokens;
+// 	while (current)
+// 	{
+// 		if (current->type == TK_WORD)
+// 		{
+// 			expanded = expand_word(current->word);
+// 			free(current->word);
+// 			current->word = expanded;
+// 		}
+// 		current = current->next;
+// 	}
+// }
+
 void	expand_tokens(t_token *tokens)
 {
 	t_token *current;
+	t_token *prev;
 	char *expanded;
+	char *unquoted;
 
 	current = tokens;
+	prev = NULL;
+	unquoted =NULL;
 	while (current)
 	{
+		if(prev && token_is(prev,"<<") )
+		{
+			if(current->word[0] == '\'')
+			{
+				unquoted = ft_strtrim(current->word,"\'");
+				free(current->word);
+				current->word = unquoted;
+			}
+			else if(current->word[0] == '\"')
+			{
+				unquoted = ft_strtrim(current->word,"\"");
+				free(current->word);
+				current->word = unquoted;
+			}
+			prev =current;
+			current =current->next;
+			continue ;
+		}
 		if (current->type == TK_WORD)
 		{
 			expanded = expand_word(current->word);
 			free(current->word);
 			current->word = expanded;
 		}
+		prev =current;
 		current = current->next;
 	}
 }
