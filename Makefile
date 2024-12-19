@@ -6,7 +6,7 @@
 #    By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/05 04:33:27 by anakin            #+#    #+#              #
-#    Updated: 2024/12/20 05:18:48 by hauchida         ###   ########.fr        #
+#    Updated: 2024/12/20 05:50:45 by hauchida         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,12 +27,30 @@ BUILTIN_SRCS = $(addprefix $(BUILTIN_DIR)/, builtin.c ft_export.c ft_unset.c ft_
 EXPAND_SRCS  = $(addprefix $(EXPAND_DIR)/, expand_tokens.c expand_word.c expand_quote.c expand_var.c)
 REDIRECT_SRCS  = $(addprefix $(REDIRECT_DIR)/, redirect_heredoc.c redirect.c)
 
-SRCS = $(addprefix $(SRC_DIR), main.c parser.c signal.c tokenize.c execution.c \
-                free.c error.c status.c map.c env.c) \
+SRCS = $(addprefix $(SRC_DIR), main.c signal.c \
+            	map.c env.c \
+				tokenize_is.c tokenize_util.c tokenize_main.c tokenize_syntax.c \
+				execution_buitin.c execution_path.c execution_pipe.c \
+				execution_util.c execution_wait.c execution_main.c \
+				free_basic.c free_wrap.c \
+				parser_main.c parser_util.c parser_redirect.c \
+				status_is.c status_get.c ) \
        $(BUILTIN_SRCS) \
        $(EXPAND_SRCS) \
 	   $(REDIRECT_SRCS)
 				
+# SRCS    	= main.c signal.c expand.c \
+# 				map.c env.c \
+# 				tokenize_is.c tokenize_util.c tokenize_main.c tokenize_syntax.c\
+# 				execution_buitin.c execution_path.c execution_pipe.c\
+# 				execution_util.c execution_wait.c execution_main.c\
+# 				free_basic.c free_wrap.c\
+# 				parser_main.c parser_util.c parser_redirect.c\
+# 				status_is.c status_get.c\
+				
+				
+				
+OBJS    	= $(SRCS:.c=.o)
 CC      	= cc
 CFLAGS		= $(INCLUDES)
 LDFLAGS		= -I $(LIB_DIR) $(LIB_NAME) -I $(EPRINTF_DIR) $(EPRINTF_NAME) -lreadline

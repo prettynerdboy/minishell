@@ -6,7 +6,7 @@
 /*   By: hauchida <hauchida@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/20 03:48:43 by hauchida          #+#    #+#             */
-/*   Updated: 2024/12/20 05:25:06 by hauchida         ###   ########.fr       */
+/*   Updated: 2024/12/20 05:53:58 by hauchida         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,5 +110,16 @@ int		ft_cd(char **argv);
 int		ft_pwd(char **argv);
 int		ft_exit(char **argv);
 int		execute_builtin(t_node *cmd_node);
+
+// path
+char	*find_cmd_path(char **path_arr, const char *cmd);
+char	*check_path(const char *cmd);
+char	*make_path(const char *cmd);
+// pipe
+void	init_pipe(t_node *node);
+void	connect_pipe(t_node *node);
+// builtin
+int		check_builtin(char *cmd);
+int		run_parent_builtin(t_node *current_node);
 
 #endif

@@ -121,7 +121,7 @@ void	shell(char *line)
 		return ;
 	if (data->nodes->next)
 		*is_pipe_heredoc() = 1;
-	open_redir_file(data->nodes); //戻り値（エラーチェック追加）
+	open_redir_file(data->nodes);
 	status = execution(data);
 	if (status >= 0)
 		*get_status() = status;
